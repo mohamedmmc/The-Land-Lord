@@ -1,0 +1,14 @@
+const String habitsIdKey = 'habits_id';
+const String daysIdKey = 'days_id';
+const String tasksIdKey = 'tasks_id';
+const String rolesIdKey = 'roles_id';
+const String currentThemeKey = 'current_theme';
+const String darkModeKey = 'dark_mode';
+const String firstTimeOpenKey = 'firstTimeExplainationDialog';
+const String tagsKey = 'tags';
+const String moveNextDayKey = 'move-next-day';
+const String goNextWeekKey = 'go-next-week';
+const String defaultRoleKey = 'default-role';
+const String hourPreferencesKey = 'hour-preferences';
+const String languageCode = 'language_code';
+const String countryCode = 'country_code';
