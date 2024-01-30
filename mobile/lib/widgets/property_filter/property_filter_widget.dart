@@ -34,7 +34,7 @@ class PropertyFilterWidget extends StatelessWidget {
         width: constraints.maxWidth,
         child: Stack(
           children: [
-            if (controller.isExpanded) Positioned.fill(child: GestureDetector(onTap: () => controller.isExpanded = !controller.isExpanded)),
+            if (controller.isExpanded) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile, updateFilter))),
             Column(
               children: [
                 Center(
@@ -53,14 +53,14 @@ class PropertyFilterWidget extends StatelessWidget {
                             color: controller.isExpanded ? kNeutralLightColor : kNeutralColor100,
                             border: Border.all(color: kNeutralLightColor, width: 0.5),
                             borderRadius: circularRadius,
-                            boxShadow: [
-                              BoxShadow(
-                                color: kNeutralLightColor.withOpacity(0.5),
-                                blurRadius: 1,
-                                spreadRadius: 1,
-                                offset: const Offset(0.0, 2.0),
-                              ),
-                            ],
+                            // boxShadow: [
+                            //   BoxShadow(
+                            //     color: kNeutralLightColor.withOpacity(0.5),
+                            //     blurRadius: 1,
+                            //     spreadRadius: 1,
+                            //     offset: const Offset(0.0, 2.0),
+                            //   ),
+                            // ],
                           ),
                           child: controller.isExpanded
                               ? CompositedTransformTarget(
@@ -139,11 +139,7 @@ class PropertyFilterWidget extends StatelessWidget {
               ],
             ),
             Positioned(
-              child: Center(
-                child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: controller.isExpanded ? constraints.maxWidth - 200 : constraints.maxWidth - 100, minWidth: 300),
-                    child: controller.filterOverlayWidget(maxWidth: constraints.maxWidth)),
-              ),
+              child: controller.filterOverlayWidget(maxWidth: constraints.maxWidth),
             ),
           ],
         ),

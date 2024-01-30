@@ -5,9 +5,10 @@ enum CalendarOptions { year, month, week, day }
 
 class AppCalendar extends StatefulWidget {
   final DateTime? date;
+  final PickerDateRange? initialSelectedRange;
   final void Function(DateRangePickerSelectionChangedArgs)? onSelectionChanged;
 
-  const AppCalendar({super.key, this.date, this.onSelectionChanged});
+  const AppCalendar({super.key, this.date, this.onSelectionChanged, this.initialSelectedRange});
 
   @override
   State<AppCalendar> createState() => _AppCalendarState();
@@ -22,6 +23,7 @@ class _AppCalendarState extends State<AppCalendar> {
       enableMultiView: true,
       minDate: DateTime.now(),
       initialDisplayDate: widget.date ?? DateTime.now(),
+      initialSelectedRange: widget.initialSelectedRange,
     );
   }
 }

@@ -35,7 +35,7 @@ class CustomAppBar extends StatelessWidget {
                     constraints: const BoxConstraints(maxHeight: 60, maxWidth: 300),
                     updateFilter: (filter) {},
                   ),
-                const CircleAvatar(radius: 18, backgroundColor: Colors.greenAccent, child: Text('GU')),
+                const CircleAvatar(radius: 18, backgroundColor: kPrimaryColor, child: Text('GU')),
                 const SizedBox(),
               ],
             ),

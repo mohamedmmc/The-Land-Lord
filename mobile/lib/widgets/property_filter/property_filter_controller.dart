@@ -1,20 +1,23 @@
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:the_land_lord_website/utils/constants/properties_dummy_data.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
+import 'package:the_land_lord_website/widgets/custom_text_field.dart';
 
 import '../../models/property_filter_model.dart';
-import '../../utils/booking_steps.dart';
+import '../../utils/enums/booking_steps.dart';
 import '../../utils/constants/colors.dart';
 import '../../utils/constants/constants.dart';
 import '../../utils/enums/property_filter_steps.dart';
-import '../../views/booking_screen.dart';
 import '../flutter_counter.dart';
 import '../select_date_widget.dart';
 
 class PropertyFilterController extends GetxController {
+  final TextEditingController searchController = TextEditingController();
   final LayerLink layerLink = LayerLink();
+  final locationsDummyData = propertiesDummyData.map((element) => element.location).toSet().toList();
   PropertyFilterSteps _currentStep = PropertyFilterSteps.where;
   List<String> guestInfoList = ['Adults', 'Children', 'Infants', 'Pets'];
   bool _isOverlayOpen = false;
@@ -52,10 +55,11 @@ class PropertyFilterController extends GetxController {
       link: layerLink,
       showWhenUnlinked: false,
       targetAnchor: currentStep == PropertyFilterSteps.guest ? Alignment.centerRight : Alignment.centerLeft,
-      offset: currentStep == PropertyFilterSteps.guest ? const Offset(-300, 50) : const Offset(0, 50),
-      child: ClipRRect(
+      offset: currentStep == PropertyFilterSteps.guest ? const Offset(-230, 50) : const Offset(0, 50),
+      child: Material(
+        color: kNeutralColor100,
         borderRadius: regularRadius,
-        child: Material(color: kNeutralColor100, child: DecoratedBox(decoration: BoxDecoration(border: lightBorder, borderRadius: regularRadius), child: menu)),
+        child: DecoratedBox(decoration: BoxDecoration(border: lightBorder, borderRadius: regularRadius), child: menu),
       ),
     );
   }
@@ -76,24 +80,47 @@ class PropertyFilterController extends GetxController {
   Widget _resolveCurrentStepMenu(double maxWidth) {
     switch (currentStep) {
       case PropertyFilterSteps.where:
-        final locationsDummyData = propertiesDummyData.map((element) => element.location).toSet().toList();
-        return SizedBox(
-          height: 300,
-          width: 200,
-          child: SingleChildScrollView(
-            child: Column(
-              children: List.generate(
-                locationsDummyData.length,
-                (index) => ListTile(
-                  onTap: () {
-                    currentSelection.location = locationsDummyData[index];
-                    Get.back();
-                    setCurrentStep(PropertyFilterSteps.checkin);
-                  },
-                  title: Text(locationsDummyData[index] ?? 'NA'),
-                  trailing: Text('(${propertiesDummyData.where((element) => element.location == locationsDummyData[index]).length} spots)'),
-                ),
-              ),
+        List<String?> filteredLocations = List.of(locationsDummyData);
+        return GestureDetector(
+          child: SizedBox(
+            height: 300,
+            width: 200,
+            child: SingleChildScrollView(
+              child: StatefulBuilder(
+                  builder: (context, setState) => Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: Paddings.regular).copyWith(bottom: Paddings.small),
+                            child: CustomTextField(
+                              hintText: 'Search Location',
+                              fieldController: searchController,
+                              onChanged: (value) {
+                                print(locationsDummyData.where((element) => element!.toLowerCase().contains(searchController.text.toLowerCase())).toList());
+                                filteredLocations = List.of(locationsDummyData.where((element) => element!.toLowerCase().contains(searchController.text.toLowerCase())).toList());
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                          ...List.generate(
+                            filteredLocations.length + 1,
+                            (index) => ListTile(
+                              onTap: () {
+                                if (index == 0) {
+                                  currentSelection.location = null;
+                                } else {
+                                  currentSelection.location = filteredLocations[index - 1];
+                                }
+                                Get.back();
+                                setCurrentStep(PropertyFilterSteps.checkin);
+                              },
+                              title: Text(index == 0 ? 'Anywhere' : filteredLocations[index - 1] ?? 'NA'),
+                              trailing: Text(index == 0
+                                  ? '(${propertiesDummyData.length} spots)'
+                                  : '(${propertiesDummyData.where((element) => element.location == filteredLocations[index - 1]).length} spots)'),
+                            ),
+                          ),
+                        ],
+                      )),
             ),
           ),
         );
@@ -103,6 +130,7 @@ class PropertyFilterController extends GetxController {
           height: 400,
           width: maxWidth - 320,
           child: SelectDateWidget(
+            initialSelectedRange: PickerDateRange(currentSelection.checkin, currentSelection.checkout),
             step: BookingStep.selectDate,
             onSelectionChanged: (selection) async {
               if (currentStep == PropertyFilterSteps.checkin) {
@@ -179,7 +207,7 @@ class PropertyFilterController extends GetxController {
 
   void manageFilter(bool isMobile, void Function(PropertyFilterModel filter) updateFilter) {
     if (isMobile) {
-      Get.toNamed(BookingDetailsScreen.routeName);
+      // Get.toNamed(BookingDetailsScreen.routeName);
     } else {
       isExpanded = !isExpanded;
       final filter = toggleOverlay();

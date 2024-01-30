@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-const MaterialColor kPrimaryColor = Colors.cyan;
-Color kPrimaryDark = Color.alphaBlend(Colors.cyan.withOpacity(0.4), kNeutralColor);
+const Color kPrimaryColor = Colors.greenAccent;
+Color kPrimaryDark = Color.alphaBlend(Colors.greenAccent.withOpacity(0.4), kNeutralColor);
 const Color kSecondaryColor = Color(0xff232d37);
 const MaterialColor kAccentColor = Colors.orange;
 const Color kErrorColor = Color(0xFFE21200);
