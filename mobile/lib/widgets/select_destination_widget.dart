@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
 
-import '../utils/booking_steps.dart';
+import '../utils/enums/booking_steps.dart';
 import '../utils/constants/constants.dart';
 
 class SelectDestinationWidget extends StatelessWidget {

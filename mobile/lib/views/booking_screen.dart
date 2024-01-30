@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
-import '../utils/booking_steps.dart';
+import '../utils/enums/booking_steps.dart';
 import '../utils/constants/colors.dart';
 import '../utils/constants/constants.dart';
 import '../widgets/select_date_widget.dart';

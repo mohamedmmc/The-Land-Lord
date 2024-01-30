@@ -5,14 +5,16 @@ import 'package:the_land_lord_website/widgets/property_card.dart';
 import 'package:the_land_lord_website/views/properties/properties_controller.dart';
 import 'package:the_land_lord_website/widgets/property_filter/property_filter_widget.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:the_land_lord_website/widgets/custom_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart' as lottie;
 
+import '../../utils/constants/assets.dart';
 import '../../utils/constants/colors.dart';
 import '../../utils/constants/constants.dart';
 import '../../utils/enums/property_type.dart';
 import '../../widgets/custom_appbar.dart';
+import '../../widgets/custom_dropdown copy.dart';
 
 class PropertiesScreen extends StatelessWidget {
   final PropertyFilterModel? filter;
@@ -63,87 +65,136 @@ class PropertiesScreen extends StatelessWidget {
                                     ),
                                   ),
                                   PropertyFilterWidget(
-                                    updateFilter: (filter) => controller.updateFilter(filterModel: filter),
+                                    updateFilter: (filter) {
+                                      if (filter.location == null && controller.filter.location != null) controller.filter.location = null;
+                                      controller.updateFilter(filterModel: filter);
+                                    },
                                     constraints: constraints,
                                     propertiesList: Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: Paddings.extraLarge * 2, vertical: Paddings.regular),
-                                      child: Wrap(
-                                        runSpacing: 20,
-                                        spacing: 30,
-                                        children: [
-                                          for (int index = 0; index < controller.filteredProperties.length; index++)
-                                            PropertyCard(
-                                              property: controller.filteredProperties[index],
-                                              key: Key(controller.filteredProperties[index].id.toString()),
+                                      child: controller.filteredProperties.isEmpty
+                                          ? SizedBox(
+                                              height: Get.height * 0.5,
+                                              child: Center(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(Paddings.regular),
+                                                  child: lottie.Lottie.asset(Assets.noDataLottie, height: Get.height * 0.3),
+                                                ),
+                                              ),
                                             )
-                                        ],
-                                      ),
+                                          : Wrap(
+                                              runSpacing: 20,
+                                              spacing: 30,
+                                              children: [
+                                                for (int index = 0; index < controller.filteredProperties.length; index++)
+                                                  PropertyCard(
+                                                    property: controller.filteredProperties[index],
+                                                    key: Key(controller.filteredProperties[index].id.toString()),
+                                                  )
+                                              ],
+                                            ),
                                     ),
                                     additionalFilters: Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: Paddings.exceptional * 2),
                                       child: Column(
                                         children: [
                                           Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                                             children: [
                                               Flexible(
                                                 child: CustomDropDownMenu(
-                                                  hintText: 'Chambres',
-                                                  items: const [1, 2, 3, 4, 5],
-                                                  width: 250,
-                                                  currentItem: controller.filter.rooms,
-                                                  onSelectItem: (value) => controller.updateFilter(rooms: value),
+                                                  buttonWidth: 400,
+                                                  hint: controller.filter.rooms != null ? '${controller.filter.rooms} Chambres' : 'Chambres',
+                                                  items: [
+                                                    'Clear',
+                                                    ...[1, 2, 3, 4, 5].map((e) => e.toString())
+                                                  ],
+                                                  selectedItem: controller.filter.rooms,
+                                                  onChanged: (value) {
+                                                    if (value == 'Clear') {
+                                                      controller.filter.rooms = null;
+                                                      controller.updateFilter();
+                                                    } else {
+                                                      controller.updateFilter(rooms: int.parse(value.toString()));
+                                                    }
+                                                  },
                                                 ),
                                               ),
                                               const SizedBox(width: 15),
                                               Flexible(
                                                 child: CustomDropDownMenu(
-                                                  hintText: 'Lits',
-                                                  items: const [1, 2, 3, 4, 5],
-                                                  width: 250,
-                                                  currentItem: controller.filter.beds,
-                                                  onSelectItem: (value) => controller.updateFilter(beds: value),
+                                                  buttonWidth: 400,
+                                                  hint: controller.filter.beds != null ? '${controller.filter.beds} Lits' : 'Lits',
+                                                  items: [
+                                                    'Clear',
+                                                    ...[1, 2, 3, 4, 5].map((e) => e.toString())
+                                                  ],
+                                                  selectedItem: controller.filter.beds,
+                                                  onChanged: (value) {
+                                                    if (value == 'Clear') {
+                                                      controller.filter.beds = null;
+                                                      controller.updateFilter();
+                                                    } else {
+                                                      controller.updateFilter(beds: int.parse(value.toString()));
+                                                    }
+                                                  },
                                                 ),
                                               ),
                                               const SizedBox(width: 15),
                                               Flexible(
                                                 child: CustomDropDownMenu(
-                                                  hintText: 'Type',
-                                                  items: PropertyType.values,
-                                                  valueFrom: (item) => item.value,
-                                                  width: 250,
-                                                  currentItem: controller.filter.type,
-                                                  onSelectItem: (value) => controller.updateFilter(type: value),
+                                                  buttonWidth: 400,
+                                                  hint: controller.filter.type != null ? controller.filter.type!.value : 'Type',
+                                                  selectedItem: controller.filter.type?.value,
+                                                  items: ['Clear', ...PropertyType.values.map((e) => e.value).toList()],
+                                                  onChanged: (value) {
+                                                    if (value == 'Clear') {
+                                                      controller.filter.type = null;
+                                                      controller.updateFilter();
+                                                    } else {
+                                                      controller.updateFilter(type: PropertyType.values.singleWhere((element) => element.value == value));
+                                                    }
+                                                  },
                                                 ),
                                               ),
                                             ],
                                           ),
-                                          Theme(
-                                            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                                            child: ExpansionTile(
-                                              title: const Text('More extra filters'),
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.symmetric(vertical: Paddings.regular),
-                                                  child: Wrap(
-                                                    runSpacing: 15,
-                                                    spacing: 10,
-                                                    children: List.generate(
-                                                      extraPropertyFilters.length,
-                                                      (index) => SizedBox(
-                                                        height: 40,
-                                                        width: 250,
-                                                        child: ListTile(
-                                                          title: Text(extraPropertyFilters[index]),
-                                                          leading: Checkbox(
-                                                            onChanged: (value) {},
-                                                            value: false,
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(vertical: Paddings.large),
+                                            child: SizedBox(
+                                              width: constraints.maxWidth - 150,
+                                              child: DecoratedBox(
+                                                decoration: BoxDecoration(color: kNeutralColor100, borderRadius: smallRadius, border: lightBorder),
+                                                child: Theme(
+                                                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                                                  child: ExpansionTile(
+                                                    title: const Text('More extra filters'),
+                                                    children: [
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(vertical: Paddings.regular),
+                                                        child: Wrap(
+                                                          runSpacing: 15,
+                                                          spacing: 10,
+                                                          children: List.generate(
+                                                            extraPropertyFilters.length,
+                                                            (index) => SizedBox(
+                                                              height: 40,
+                                                              width: 250,
+                                                              child: ListTile(
+                                                                title: Text(extraPropertyFilters[index]),
+                                                                leading: Checkbox(
+                                                                  onChanged: (value) {},
+                                                                  value: false,
+                                                                ),
+                                                              ),
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
-                                                    ),
+                                                    ],
                                                   ),
                                                 ),
-                                              ],
+                                              ),
                                             ),
                                           ),
                                         ],

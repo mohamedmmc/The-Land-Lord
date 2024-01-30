@@ -3,14 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
-import '../utils/booking_steps.dart';
+import '../utils/enums/booking_steps.dart';
 import 'app_calendar.dart';
 
 class SelectDateWidget extends StatelessWidget {
   final BookingStep step;
   final void Function(DateRangePickerSelectionChangedArgs)? onSelectionChanged;
+  final PickerDateRange? initialSelectedRange;
 
-  const SelectDateWidget({super.key, required this.step, this.onSelectionChanged});
+  const SelectDateWidget({super.key, required this.step, this.onSelectionChanged, this.initialSelectedRange});
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +27,10 @@ class SelectDateWidget extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: Paddings.large, horizontal: Paddings.large),
           duration: const Duration(milliseconds: 300),
           child: step == BookingStep.selectDate
-              ? AppCalendar(onSelectionChanged: onSelectionChanged).animate(delay: const Duration(milliseconds: 300)).fadeIn(
-                    duration: const Duration(milliseconds: 300),
-                  )
+              ? AppCalendar(
+                  onSelectionChanged: onSelectionChanged,
+                  initialSelectedRange: initialSelectedRange,
+                ).animate(delay: const Duration(milliseconds: 300)).fadeIn(duration: const Duration(milliseconds: 300))
               // Could be needed in mobile version
               // Column(
               //     crossAxisAlignment: CrossAxisAlignment.start,
