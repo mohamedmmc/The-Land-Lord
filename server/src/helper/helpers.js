@@ -40,6 +40,7 @@ async function getDetailedProperties(propertyList) {
 
   for (const [index, property] of propertyList.entries()) {
     const ID = property.id;
+    // const ID = propertyList[0].id;
     var body = {
       Pull_ListSpecProp_RQ: {
         Authentication: {
@@ -163,7 +164,9 @@ async function getDetailedProperties(propertyList) {
               language_id: description["$"].LanguageID,
               text: description.Text[0],
               house_rules:
-                description?.HouseRules != null ?? description?.HouseRules[0],
+                description?.HouseRules != null
+                  ? description?.HouseRules[0]
+                  : "",
             };
           }
         );

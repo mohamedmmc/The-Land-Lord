@@ -210,3 +210,50 @@ exports.propertyType = async (req, res) => {
     return res.status(500).json({ error });
   }
 };
+
+exports.getReservations = async (req, res) => {
+  try {
+    const timestamp = Date.now(); // Get the current timestamp in milliseconds
+    const date = new Date(timestamp); // Create a new Date object from the timestamp
+    const formattedDate = date.toISOString().slice(0, 10);
+    const body = {
+      Pull_ListPropertiesBlocks_RQ: {
+        Authentication: {
+          UserName: process.env.RENTALS_UNITED_LOGIN,
+          Password: process.env.RENTALS_UNITED_PASS,
+        },
+        // PropertyID: 2698982,
+        LocationId: 63298,
+        DateFrom: formattedDate,
+        DateTo: "2024-03-02",
+      },
+    };
+    const xmlData = convertJsonToXml(body);
+
+    const apiResponse = await axios.post(
+      process.env.RENTALS_UNITED_LINK,
+      xmlData,
+      {
+        headers: {
+          "Content-Type": "text/xml",
+        },
+      }
+    );
+    var listPropertyType = [];
+    const propertyListJson = await convertXmlToJson(apiResponse.data);
+    // for (const detailedProperty of propertyListJson.Pull_ListPropTypes_RS
+    //   .PropertyTypes[0].PropertyType) {
+    //   const name = detailedProperty._;
+    //   const ids = detailedProperty.$;
+
+    //   const newObject = {
+    //     name: name,
+    //     locationID: ids.PropertyTypeID,
+    //   };
+    //   listPropertyType.push(newObject);
+    // }
+    return res.status(200).json({ propertyListJson });
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
+};

@@ -9,6 +9,7 @@ const app = require("./app");
 require("./src/routes/rental_united_route")(app);
 require("./src/routes/database_route")(app);
 require("./src/routes/location_route")(app);
+require("./src/routes/property_route")(app);
 
 // PORT
 const PORT = process.env.PORT || 3000;
