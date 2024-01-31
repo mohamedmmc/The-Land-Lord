@@ -1,11 +1,12 @@
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
-import 'package:the_land_lord_website/utils/constants/properties_dummy_data.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:the_land_lord_website/models/Location.dart';
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
 import 'package:the_land_lord_website/widgets/custom_text_field.dart';
 
+import '../../services/main_app_service.dart';
 import '../../models/property_filter_model.dart';
 import '../../utils/enums/booking_steps.dart';
 import '../../utils/constants/colors.dart';
@@ -17,7 +18,6 @@ import '../select_date_widget.dart';
 class PropertyFilterController extends GetxController {
   final TextEditingController searchController = TextEditingController();
   final LayerLink layerLink = LayerLink();
-  final locationsDummyData = propertiesDummyData.map((element) => element.location).toSet().toList();
   PropertyFilterSteps _currentStep = PropertyFilterSteps.where;
   List<String> guestInfoList = ['Adults', 'Children', 'Infants', 'Pets'];
   bool _isOverlayOpen = false;
@@ -28,6 +28,10 @@ class PropertyFilterController extends GetxController {
   set isExpanded(bool value) {
     _isExpanded = value;
     update();
+  }
+
+  PropertyFilterController() {
+    _init();
   }
 
   PropertyFilterModel currentSelection = PropertyFilterModel();
@@ -67,7 +71,7 @@ class PropertyFilterController extends GetxController {
   Text resolveStepSubtitle(PropertyFilterSteps step) {
     switch (step) {
       case PropertyFilterSteps.where:
-        return Text(currentSelection.location ?? 'Any Where');
+        return Text(currentSelection.location != null ? MainAppServie.find.getLocatioNameById(currentSelection.location!) : 'Any Where');
       case PropertyFilterSteps.checkin:
         return Text(currentSelection.checkin != null ? DateFormat.yMd().format(currentSelection.checkin!) : 'Any Time');
       case PropertyFilterSteps.checkout:
@@ -80,11 +84,11 @@ class PropertyFilterController extends GetxController {
   Widget _resolveCurrentStepMenu(double maxWidth) {
     switch (currentStep) {
       case PropertyFilterSteps.where:
-        List<String?> filteredLocations = List.of(locationsDummyData);
+        List<LocationData> filteredLocations = List.of(MainAppServie.find.locationList);
         return GestureDetector(
           child: SizedBox(
             height: 300,
-            width: 200,
+            width: 250,
             child: SingleChildScrollView(
               child: StatefulBuilder(
                   builder: (context, setState) => Column(
@@ -95,8 +99,8 @@ class PropertyFilterController extends GetxController {
                               hintText: 'Search Location',
                               fieldController: searchController,
                               onChanged: (value) {
-                                print(locationsDummyData.where((element) => element!.toLowerCase().contains(searchController.text.toLowerCase())).toList());
-                                filteredLocations = List.of(locationsDummyData.where((element) => element!.toLowerCase().contains(searchController.text.toLowerCase())).toList());
+                                filteredLocations =
+                                    List.of(MainAppServie.find.locationList.where((element) => element.name.toLowerCase().contains(searchController.text.toLowerCase())).toList());
                                 setState(() {});
                               },
                             ),
@@ -108,15 +112,16 @@ class PropertyFilterController extends GetxController {
                                 if (index == 0) {
                                   currentSelection.location = null;
                                 } else {
-                                  currentSelection.location = filteredLocations[index - 1];
+                                  currentSelection.location = filteredLocations[index - 1].id;
                                 }
                                 Get.back();
+                                searchController.clear();
                                 setCurrentStep(PropertyFilterSteps.checkin);
                               },
-                              title: Text(index == 0 ? 'Anywhere' : filteredLocations[index - 1] ?? 'NA'),
+                              title: Text(index == 0 ? 'Anywhere' : filteredLocations[index - 1].name),
                               trailing: Text(index == 0
-                                  ? '(${propertiesDummyData.length} spots)'
-                                  : '(${propertiesDummyData.where((element) => element.location == filteredLocations[index - 1]).length} spots)'),
+                                  ? '(${MainAppServie.find.propertyList.length} spots)'
+                                  : '(${MainAppServie.find.propertyList.where((element) => element.location == filteredLocations[index - 1].id).length} spots)'),
                             ),
                           ),
                         ],
@@ -190,6 +195,19 @@ class PropertyFilterController extends GetxController {
     }
   }
 
+  void manageFilter(bool isMobile, void Function(PropertyFilterModel filter) updateFilter) {
+    if (isMobile) {
+      // Get.toNamed(BookingDetailsScreen.routeName);
+    } else {
+      isExpanded = !isExpanded;
+      final filter = toggleOverlay();
+      if (!isExpanded) updateFilter.call(filter);
+      update();
+    }
+  }
+
+  void _init() {}
+
   int _resolveInitialValue(int index) {
     switch (index) {
       case 0:
@@ -202,17 +220,6 @@ class PropertyFilterController extends GetxController {
         return currentSelection.guest.pets;
       default:
         return 0;
-    }
-  }
-
-  void manageFilter(bool isMobile, void Function(PropertyFilterModel filter) updateFilter) {
-    if (isMobile) {
-      // Get.toNamed(BookingDetailsScreen.routeName);
-    } else {
-      isExpanded = !isExpanded;
-      final filter = toggleOverlay();
-      if (!isExpanded) updateFilter.call(filter);
-      update();
     }
   }
 }

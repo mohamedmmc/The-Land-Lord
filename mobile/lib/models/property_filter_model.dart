@@ -4,7 +4,7 @@ import '../utils/enums/property_type.dart';
 import 'guest.dart';
 
 class PropertyFilterModel {
-  String? location;
+  int? location;
   DateTime? checkin;
   DateTime? checkout;
   final Guest guest;

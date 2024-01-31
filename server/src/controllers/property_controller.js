@@ -22,11 +22,10 @@ exports.getAvailable = async (req, res) => {
   const offset = (page - 1) * limit;
   try {
     const query = `
-    SELECT
+      SELECT
       property.id,
       property.name as name,
       SUBSTRING_INDEX(GROUP_CONCAT(property_image.url ORDER BY property_image.url ASC SEPARATOR ','), ',', 3) AS image_urls,
-      location.name as location,
       description.house_rules,
       description.text,
       property.can_sleep_max,
@@ -49,6 +48,13 @@ exports.getAvailable = async (req, res) => {
       )`
         : ""
     }
+      property.standard_guests,
+      location.id as location
+      FROM property
+      JOIN property_image ON property.id = property_image.property_id
+      JOIN location ON property.location_id = location.id
+      JOIN description on property.id = description.property_id
+      WHERE property.is_active = 'true'
       ${
         petAllowed !== undefined
           ? "AND description.house_rules LIKE :petAllowed"
@@ -62,8 +68,8 @@ exports.getAvailable = async (req, res) => {
       ${isNaN(location) ? "" : "AND property.location_id = :location"}
       ${isNaN(guest) ? "" : "AND property.standard_guests <= :guest"}
       ${isNaN(room) ? "" : "AND property.can_sleep_max <= :room"}
-  
-    GROUP BY property.id, property.name, location.name
+    GROUP BY property.id, property.name, location.id
+    
     `;
 
     const locationList = await sequelize.query(query, {
@@ -88,7 +94,7 @@ exports.getAvailable = async (req, res) => {
       images: row.image_urls.split(","),
       houseRules: row.house_rules,
       description: row.text,
-      rooms: row.can_sleep_max,
+      beds: row.can_sleep_max,
       guests: row.standard_guests,
     }));
     return res.status(200).json({ formattedList });
