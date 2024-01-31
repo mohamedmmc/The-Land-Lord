@@ -13,6 +13,7 @@ const { PropertyRoom } = require("../models/property_room_model");
 const { PropertyImage } = require("../models/property_image_model");
 const { PropertyPaiement } = require("../models/property_paiement_model");
 const { Description } = require("../models/description_model");
+const { Reservation } = require("../models/reservation_model");
 exports.getAll = async (req, res) => {
   var adresse;
   const body = {
@@ -213,46 +214,66 @@ exports.propertyType = async (req, res) => {
 
 exports.getReservations = async (req, res) => {
   try {
-    const timestamp = Date.now(); // Get the current timestamp in milliseconds
-    const date = new Date(timestamp); // Create a new Date object from the timestamp
-    const formattedDate = date.toISOString().slice(0, 10);
-    const body = {
-      Pull_ListPropertiesBlocks_RQ: {
-        Authentication: {
-          UserName: process.env.RENTALS_UNITED_LOGIN,
-          Password: process.env.RENTALS_UNITED_PASS,
-        },
-        // PropertyID: 2698982,
-        LocationId: 63298,
-        DateFrom: formattedDate,
-        DateTo: "2024-03-02",
-      },
-    };
-    const xmlData = convertJsonToXml(body);
-
-    const apiResponse = await axios.post(
-      process.env.RENTALS_UNITED_LINK,
-      xmlData,
-      {
-        headers: {
-          "Content-Type": "text/xml",
-        },
-      }
+    var listReservations = [];
+    const nowDate = new Date();
+    const oneYearLaterDate = new Date(
+      nowDate.getFullYear() + 1,
+      nowDate.getMonth(),
+      nowDate.getDate()
     );
-    var listPropertyType = [];
-    const propertyListJson = await convertXmlToJson(apiResponse.data);
-    // for (const detailedProperty of propertyListJson.Pull_ListPropTypes_RS
-    //   .PropertyTypes[0].PropertyType) {
-    //   const name = detailedProperty._;
-    //   const ids = detailedProperty.$;
-
-    //   const newObject = {
-    //     name: name,
-    //     locationID: ids.PropertyTypeID,
-    //   };
-    //   listPropertyType.push(newObject);
-    // }
-    return res.status(200).json({ propertyListJson });
+    const nowFormatted = nowDate.toISOString().slice(0, 10);
+    const oneYearLaterFormatted = oneYearLaterDate.toISOString().slice(0, 10);
+    const query = `
+    SELECT location.id ,location.name, COUNT(location.name) as count FROM location
+    JOIN property on location.id = property.location_id
+    WHERE property.is_active = 'true'
+    GROUP by location.name
+  `;
+    const locationList = await sequelize.query(query, {
+      type: sequelize.QueryTypes.SELECT,
+    });
+    let index = 0;
+    for (const location of locationList) {
+      const body = {
+        Pull_ListPropertiesBlocks_RQ: {
+          Authentication: {
+            UserName: process.env.RENTALS_UNITED_LOGIN,
+            Password: process.env.RENTALS_UNITED_PASS,
+          },
+          LocationID: location.id,
+          DateFrom: nowFormatted,
+          DateTo: oneYearLaterFormatted,
+        },
+      };
+      const xmlData = convertJsonToXml(body);
+      const apiResponse = await axios.post(
+        process.env.RENTALS_UNITED_LINK,
+        xmlData,
+        {
+          headers: {
+            "Content-Type": "text/xml",
+          },
+        }
+      );
+      const propertyListJson = await convertXmlToJson(apiResponse.data);
+      if (propertyListJson.Pull_ListPropertiesBlocks_RS.Properties[0] !== "")
+        for (const propertyReservation of propertyListJson
+          .Pull_ListPropertiesBlocks_RS.Properties?.[0]?.PropertyBlock) {
+          for (const dates of propertyReservation.Block) {
+            const reservation = {
+              property_id: propertyReservation["$"].PropertyID,
+              date_from: dates.DateFrom[0],
+              date_to: dates.DateTo[0],
+            };
+            listReservations.push(reservation);
+          }
+        }
+      index++;
+      console.log(`${index} of ${locationList.length}`);
+    }
+    await Reservation.destroy({ where: {} });
+    const reservationSaved = await Reservation.bulkCreate(listReservations);
+    return res.status(200).json({ reservationSaved });
   } catch (error) {
     return res.status(500).json({ error });
   }

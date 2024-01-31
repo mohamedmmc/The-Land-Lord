@@ -4,7 +4,8 @@ const Reservation = sequelize.define(
   "reservation",
   {
     id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
-    count: { type: Sequelize.INTEGER, allowNull: false },
+    date_from: { type: Sequelize.STRING, allowNull: false },
+    date_to: { type: Sequelize.STRING, allowNull: false },
   },
   {
     tableName: "reservation",

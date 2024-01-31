@@ -7,6 +7,8 @@ exports.getAvailable = async (req, res) => {
     languageQuery,
     priceMin,
     priceMax,
+    dateFrom,
+    dateTo,
     pageQuery,
     limitQuery,
     guest,
@@ -34,6 +36,19 @@ exports.getAvailable = async (req, res) => {
     JOIN location ON property.location_id = location.id
     JOIN description on property.id = description.property_id
     WHERE property.is_active = 'true'
+    ${
+      dateFrom !== undefined && dateFrom && dateTo !== undefined && dateTo
+        ? `AND property.id NOT IN (
+        SELECT property_id
+        FROM Reservation
+        WHERE
+          (CAST(date_from AS DATE) BETWEEN CAST(:dateFrom AS DATE) AND CAST(:dateTo AS DATE)) OR
+          (CAST(date_to AS DATE) BETWEEN CAST(:dateFrom AS DATE) AND CAST(:dateTo AS DATE)) OR
+          (CAST(:dateFrom AS DATE) BETWEEN CAST(date_from AS DATE) AND CAST(date_to AS DATE)) OR
+          (CAST(:dateTo AS DATE) BETWEEN CAST(date_from AS DATE) AND CAST(date_to AS DATE))
+      )`
+        : ""
+    }
       ${
         petAllowed !== undefined
           ? "AND description.house_rules LIKE :petAllowed"
@@ -47,8 +62,8 @@ exports.getAvailable = async (req, res) => {
       ${isNaN(location) ? "" : "AND property.location_id = :location"}
       ${isNaN(guest) ? "" : "AND property.standard_guests <= :guest"}
       ${isNaN(room) ? "" : "AND property.can_sleep_max <= :room"}
+  
     GROUP BY property.id, property.name, location.name
-
     `;
 
     const locationList = await sequelize.query(query, {
@@ -58,6 +73,8 @@ exports.getAvailable = async (req, res) => {
         guest: guest,
         room: room,
         offset: offset,
+        dateFrom: dateFrom,
+        dateTo: dateTo,
         limit: limit,
         petAllowed: `%Pets - ${petAllowed}%`,
         smokeAllowed: `%Smoking - ${smokeAllowed}%`,
@@ -76,6 +93,6 @@ exports.getAvailable = async (req, res) => {
     }));
     return res.status(200).json({ formattedList });
   } catch (error) {
-    return res.status(500).json({ message: "error" });
+    return res.status(500).json({ message: error });
   }
 };
