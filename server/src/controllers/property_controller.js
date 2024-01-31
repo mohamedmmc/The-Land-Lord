@@ -23,53 +23,51 @@ exports.getAvailable = async (req, res) => {
   try {
     const query = `
       SELECT
-      property.id,
-      property.name as name,
-      SUBSTRING_INDEX(GROUP_CONCAT(property_image.url ORDER BY property_image.url ASC SEPARATOR ','), ',', 3) AS image_urls,
-      description.house_rules,
-      description.text,
-      property.can_sleep_max,
-      property.standard_guests
-    FROM property
-    JOIN property_image ON property.id = property_image.property_id
-    JOIN location ON property.location_id = location.id
-    JOIN description on property.id = description.property_id
-    WHERE property.is_active = 'true'
-    ${
-      dateFrom !== undefined && dateFrom && dateTo !== undefined && dateTo
-        ? `AND property.id NOT IN (
-        SELECT property_id
-        FROM Reservation
-        WHERE
-          (CAST(date_from AS DATE) BETWEEN CAST(:dateFrom AS DATE) AND CAST(:dateTo AS DATE)) OR
-          (CAST(date_to AS DATE) BETWEEN CAST(:dateFrom AS DATE) AND CAST(:dateTo AS DATE)) OR
-          (CAST(:dateFrom AS DATE) BETWEEN CAST(date_from AS DATE) AND CAST(date_to AS DATE)) OR
-          (CAST(:dateTo AS DATE) BETWEEN CAST(date_from AS DATE) AND CAST(date_to AS DATE))
-      )`
-        : ""
-    }
-      property.standard_guests,
-      location.id as location
+        property.id,
+        property.name AS name,
+        SUBSTRING_INDEX(GROUP_CONCAT(property_image.url ORDER BY property_image.url ASC SEPARATOR ','), ',', 3) AS image_urls,
+        description.house_rules,
+        description.text,
+        property.can_sleep_max,
+        property.standard_guests,
+        location.id AS location
       FROM property
       JOIN property_image ON property.id = property_image.property_id
       JOIN location ON property.location_id = location.id
-      JOIN description on property.id = description.property_id
+      JOIN description ON property.id = description.property_id
       WHERE property.is_active = 'true'
-      ${
-        petAllowed !== undefined
-          ? "AND description.house_rules LIKE :petAllowed"
-          : ""
-      }
-      ${
-        smokeAllowed !== undefined
-          ? "AND description.house_rules LIKE :smokeAllowed"
-          : ""
-      }
-      ${isNaN(location) ? "" : "AND property.location_id = :location"}
-      ${isNaN(guest) ? "" : "AND property.standard_guests <= :guest"}
-      ${isNaN(room) ? "" : "AND property.can_sleep_max <= :room"}
-    GROUP BY property.id, property.name, location.id
-    
+        AND (
+          CASE WHEN :dateFrom IS NOT NULL AND :dateTo IS NULL THEN
+            CAST(:dateFrom AS DATE) + INTERVAL 1 MONTH
+          WHEN :dateTo IS NOT NULL AND :dateFrom IS NULL THEN
+            CAST(:dateTo AS DATE) - INTERVAL 1 MONTH
+          ELSE
+            property.id NOT IN (
+              SELECT property_id
+              FROM Reservation
+              WHERE (
+                CAST(date_from AS DATE) BETWEEN CAST(:dateFrom AS DATE) AND CAST(:dateTo AS DATE)
+                OR CAST(date_to AS DATE) BETWEEN CAST(:dateFrom AS DATE) AND CAST(:dateTo AS DATE)
+                OR CAST(:dateFrom AS DATE) BETWEEN CAST(date_from AS DATE) AND CAST(date_to AS DATE)
+                OR CAST(:dateTo AS DATE) BETWEEN CAST(date_from AS DATE) AND CAST(date_to AS DATE)
+              )
+            )
+          END
+        )
+        ${
+          petAllowed !== undefined
+            ? "AND description.house_rules LIKE :petAllowed"
+            : ""
+        }
+        ${
+          smokeAllowed !== undefined
+            ? "AND description.house_rules LIKE :smokeAllowed"
+            : ""
+        }
+        ${isNaN(location) ? "" : "AND property.location_id = :location"}
+        ${isNaN(guest) ? "" : "AND property.standard_guests <= :guest"}
+        ${isNaN(room) ? "" : "AND property.can_sleep_max <= :room"}
+      GROUP BY property.id, property.name, location.id
     `;
 
     const locationList = await sequelize.query(query, {
@@ -79,8 +77,8 @@ exports.getAvailable = async (req, res) => {
         guest: guest,
         room: room,
         offset: offset,
-        dateFrom: dateFrom,
-        dateTo: dateTo,
+        dateFrom: dateFrom ?? null,
+        dateTo: dateTo ?? null,
         limit: limit,
         petAllowed: `%Pets - ${petAllowed}%`,
         smokeAllowed: `%Smoking - ${smokeAllowed}%`,
