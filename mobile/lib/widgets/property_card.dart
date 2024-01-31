@@ -1,7 +1,9 @@
+import 'package:the_land_lord_website/services/main_app_service.dart';
 import 'package:the_land_lord_website/models/property.dart';
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
+import 'package:the_land_lord_website/widgets/overflowed_text_with_tooltip.dart';
 
 import '../utils/constants/colors.dart';
 import '../utils/constants/constants.dart';
@@ -27,14 +29,14 @@ class PropertyCard extends StatelessWidget {
                   ClipRRect(
                     borderRadius: regularRadius,
                     child: Swiper(
-                      itemBuilder: (_, int i) => Image.asset(
-                        property.imagePath.toString(),
+                      itemBuilder: (_, int i) => Image.network(
+                        property.imagePath![i],
                         height: 200,
                         width: 250,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, error, stackTrace) => Image.asset("assets/images/no_image.jpg"),
+                        errorBuilder: (_, error, stackTrace) => Image.asset("assets/images/no_image.jpg", height: 200, width: 250, fit: BoxFit.cover),
                       ),
-                      itemCount: 3,
+                      itemCount: property.imagePath?.length ?? 1,
                       pagination: const SwiperPagination(),
                       control: const SwiperControl(), // TODO Customize this
                     ),
@@ -65,7 +67,7 @@ class PropertyCard extends StatelessWidget {
             const SizedBox(height: Paddings.regular),
             Row(
               children: [
-                Flexible(flex: 5, child: Text(property.title ?? 'NA', style: AppFonts.x15Bold, maxLines: 1, overflow: TextOverflow.ellipsis)),
+                Flexible(flex: 5, child: OverflowedTextWithTooltip(title: property.name ?? 'NA', style: AppFonts.x15Bold, expand: false)),
                 const SizedBox(width: Paddings.small),
                 Flexible(
                   flex: 3,
@@ -73,22 +75,28 @@ class PropertyCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       const Icon(Icons.star),
-                      Text('${property.rating} (${property.reviews})'),
+                      Text('${property.rating ?? '5'} (${property.reviews ?? 54})'),
                     ],
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 5),
-            Text(property.description ?? 'NA', maxLines: 1, overflow: TextOverflow.ellipsis),
-            Text('${property.beds ?? 0} beds'),
+            Text(MainAppServie.find.getLocatioNameById(property.location!), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Row(
+              children: [
+                Text('${property.beds ?? 0} beds'),
+                const Text(' • '),
+                Text('${property.guests ?? 0} guests'),
+              ],
+            ),
             const SizedBox(height: 5),
             RichText(
               text: TextSpan(
                 text: '',
                 style: AppFonts.x14Regular,
                 children: [
-                  TextSpan(text: '${property.pricePerNight} TND', style: AppFonts.x14Bold),
+                  TextSpan(text: '${property.pricePerNight ?? 0} TND', style: AppFonts.x14Bold),
                   const TextSpan(text: '/night • duration_cost'),
                 ],
               ),
