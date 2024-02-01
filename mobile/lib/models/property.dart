@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:latlong2/latlong.dart';
+
 class Property {
   String? id;
   String? name;
@@ -15,6 +19,7 @@ class Property {
   double? rating;
   int? reviews;
   String? houseRules;
+  LatLng? coordinates;
 
   Property({
     this.id,
@@ -33,6 +38,7 @@ class Property {
     this.houseRules,
     this.rating,
     this.reviews,
+    this.coordinates,
   });
 
   Property.fromJson(Map<String, dynamic> json) {
@@ -53,6 +59,8 @@ class Property {
     rating = json['rating'] != null ? double.parse(json['rating']) : null;
     reviews = json['reviews'];
     houseRules = json['rules'];
+    coordinates =
+        json['coordinates'] == null ? null : LatLng(double.parse(jsonDecode(json['coordinates'])['Latitude'][0]), double.parse(jsonDecode(json['coordinates'])['Longitude'][0]));
   }
 
   Map<String, dynamic> toJson() {

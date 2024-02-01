@@ -71,7 +71,7 @@ class PropertyFilterController extends GetxController {
   Text resolveStepSubtitle(PropertyFilterSteps step) {
     switch (step) {
       case PropertyFilterSteps.where:
-        return Text(currentSelection.location != null ? MainAppServie.find.getLocatioNameById(currentSelection.location!) : 'Any Where');
+        return Text(currentSelection.location != null ? MainAppServie.find.getLocationNameById(currentSelection.location!) : 'Any Where');
       case PropertyFilterSteps.checkin:
         return Text(currentSelection.checkin != null ? DateFormat.yMd().format(currentSelection.checkin!) : 'Any Time');
       case PropertyFilterSteps.checkout:

@@ -12,18 +12,24 @@ import 'custom_buttons.dart';
 
 class PropertyCard extends StatelessWidget {
   final Property property;
-  const PropertyCard({super.key, required this.property});
+  final double? width;
+  final double? height;
+  const PropertyCard({super.key, required this.property, this.width, this.height});
 
   @override
-  Widget build(BuildContext context) => SizedBox(
-        width: 250,
-        height: 320,
+  Widget build(BuildContext context) {
+    MainAppServie.find.locationList;
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxHeight: height ?? 320, maxWidth: width ?? 250),
+      child: SizedBox(
+        width: width ?? 250,
+        height: height ?? 320,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 200,
-              width: 250,
+              height: height != null ? height! - 120 : 200,
+              width: width ?? 250,
               child: Stack(
                 children: [
                   ClipRRect(
@@ -31,10 +37,15 @@ class PropertyCard extends StatelessWidget {
                     child: Swiper(
                       itemBuilder: (_, int i) => Image.network(
                         property.imagePath![i],
-                        height: 200,
-                        width: 250,
+                        height: height != null ? height! - 120 : 200,
+                        width: width ?? 250,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, error, stackTrace) => Image.asset("assets/images/no_image.jpg", height: 200, width: 250, fit: BoxFit.cover),
+                        errorBuilder: (_, error, stackTrace) => Image.asset(
+                          "assets/images/no_image.jpg",
+                          height: height != null ? height! - 120 : 200,
+                          width: width ?? 250,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                       itemCount: property.imagePath?.length ?? 1,
                       pagination: const SwiperPagination(),
@@ -42,8 +53,8 @@ class PropertyCard extends StatelessWidget {
                     ),
                     // Image.asset(
                     //   'assets/images/house$index.jpeg',
-                    //   height: 200,
-                    //   width: 250,
+                    //   height: height != null ? height! - 120 : 200,
+                    //   width: width ?? 250,
                     //   fit: BoxFit.cover,
                     //   errorBuilder: (_, error, stackTrace) => Image.asset("assets/images/no_image.jpg"),
                     // ),
@@ -82,7 +93,7 @@ class PropertyCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 5),
-            Text(MainAppServie.find.getLocatioNameById(property.location!), maxLines: 1, overflow: TextOverflow.ellipsis),
+            Text(MainAppServie.find.getLocationNameById(property.location!), maxLines: 1, overflow: TextOverflow.ellipsis),
             Row(
               children: [
                 Text('${property.beds ?? 0} beds'),
@@ -103,5 +114,7 @@ class PropertyCard extends StatelessWidget {
             ),
           ],
         ),
-      );
+      ),
+    );
+  }
 }

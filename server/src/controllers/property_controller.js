@@ -23,14 +23,15 @@ exports.getAvailable = async (req, res) => {
   try {
     const query = `
       SELECT
-        property.id,
-        property.name AS name,
-        SUBSTRING_INDEX(GROUP_CONCAT(property_image.url ORDER BY property_image.url ASC SEPARATOR ','), ',', 3) AS image_urls,
-        description.house_rules,
-        description.text,
-        property.can_sleep_max,
-        property.standard_guests,
-        location.id AS location
+      property.id,
+      property.name as name,
+      SUBSTRING_INDEX(GROUP_CONCAT(property_image.url ORDER BY property_image.url ASC SEPARATOR ','), ',', 3) AS image_urls,
+      description.house_rules,
+      description.text,
+      property.can_sleep_max,
+      property.standard_guests,
+      property.coordinates,
+      location.id as location
       FROM property
       JOIN property_image ON property.id = property_image.property_id
       JOIN location ON property.location_id = location.id
@@ -90,6 +91,7 @@ exports.getAvailable = async (req, res) => {
       id: row.id,
       name: row.name,
       location: row.location,
+      coordinates: row.coordinates,
       images: row.image_urls.split(","),
       houseRules: row.house_rules,
       description: row.text,

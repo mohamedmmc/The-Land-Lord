@@ -15,7 +15,14 @@ class MainAppServie extends GetxService {
   List<Property> propertyList = [];
 
   bool get isUserLoggedIn => SharedPreferencesService.find.get('jwt') != null;
-  String getLocatioNameById(int id) => locationList.singleWhere((element) => element.id == id).name;
+  String getLocationNameById(int id) {
+    try {
+      return locationList.singleWhere((element) => element.id == id).name;
+    } catch (e) {
+      // TODO fix this
+      return 'Error';
+    }
+  }
   // User? get currentUser => isUserLoggedIn ? User.fromToken(JWT.decode(SharedPreferencesService.find.get('jwt')!).payload) : null;
 
   MainAppServie() {
