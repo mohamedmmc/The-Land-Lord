@@ -1,5 +1,5 @@
 const { sequelize } = require("../../db.config");
-
+const { getDate } = require("../helper/helpers");
 // get all regions by available properties
 exports.getAvailable = async (req, res) => {
   const {
@@ -30,13 +30,17 @@ exports.getAvailable = async (req, res) => {
         description.text,
         property.can_sleep_max,
         property.standard_guests,
-        location.id AS location
+        location.id AS location,
+        property_price.price 
       FROM property
       JOIN property_image ON property.id = property_image.property_id
       JOIN location ON property.location_id = location.id
       JOIN description ON property.id = description.property_id
+      LEFT JOIN property_price ON property.id = property_price.property_id AND CAST(:dateFrom AS DATE) BETWEEN property_price.date_from AND property_price.date_to
       WHERE property.is_active = 'true'
-      AND (
+      ${
+        dateFrom || dateTo
+          ? `AND (
           CASE WHEN :dateFrom IS NOT NULL AND :dateTo IS NULL THEN
             CAST(:dateFrom AS DATE) + INTERVAL 1 MONTH
           WHEN :dateTo IS NOT NULL AND :dateFrom IS NULL THEN
@@ -53,7 +57,10 @@ exports.getAvailable = async (req, res) => {
               )
             )
           END
-        )
+        )`
+          : ""
+      }
+
         ${
           petAllowed !== undefined
             ? "AND description.house_rules LIKE :petAllowed"
@@ -65,12 +72,14 @@ exports.getAvailable = async (req, res) => {
             : ""
         }
         ${isNaN(location) ? "" : "AND property.location_id = :location"}
-        ${isNaN(guest) ? "" : "AND property.standard_guests <= :guest"}
-        ${isNaN(room) ? "" : "AND property.can_sleep_max <= :room"}
+        ${isNaN(guest) ? "" : "AND property.standard_guests = :guest"}
+        ${isNaN(room) ? "" : "AND property.can_sleep_max = :room"}
+        ${isNaN(priceMax) ? "" : "AND property_price.price <= :priceMax"}
+        ${isNaN(priceMin) ? "" : "AND property_price.price >= :priceMin"}
       GROUP BY property.id, property.name, location.id
-       LIMIT :limit OFFSET :offset;
+       
     `;
-
+    // LIMIT :limit OFFSET :offset;
     const locationList = await sequelize.query(query, {
       type: sequelize.QueryTypes.SELECT,
       replacements: {
@@ -78,9 +87,11 @@ exports.getAvailable = async (req, res) => {
         guest: guest,
         room: room,
         offset: offset,
-        dateFrom: dateFrom ?? null,
+        dateFrom: dateFrom ?? getDate(0, "years"),
         dateTo: dateTo ?? null,
         limit: limit,
+        priceMax: parseInt(priceMax),
+        priceMin: parseInt(priceMin),
         petAllowed: `%Pets - ${petAllowed}%`,
         smokeAllowed: `%Smoking - ${smokeAllowed}%`,
       },
@@ -89,6 +100,7 @@ exports.getAvailable = async (req, res) => {
     const formattedList = locationList.map((row) => ({
       id: row.id,
       name: row.name,
+      price: row.price,
       location: row.location,
       images: row.image_urls.split(","),
       houseRules: row.house_rules,
