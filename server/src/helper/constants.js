@@ -66642,14 +66642,14 @@ const constantId = {
       timezone: "Africa/Tunis",
     },
     {
-      name: "Carthage",
+      name: "Site archéologique de Carthage",
       id: "63298",
       locationTypeID: "4",
       parentLocationID: "9502",
       timezone: "Africa/Tunis",
     },
     {
-      name: "La Marsa",
+      name: "Marsa",
       id: "63299",
       locationTypeID: "4",
       parentLocationID: "9502",

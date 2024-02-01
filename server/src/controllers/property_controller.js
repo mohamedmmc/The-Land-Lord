@@ -36,7 +36,7 @@ exports.getAvailable = async (req, res) => {
       JOIN location ON property.location_id = location.id
       JOIN description ON property.id = description.property_id
       WHERE property.is_active = 'true'
-        AND (
+      AND (
           CASE WHEN :dateFrom IS NOT NULL AND :dateTo IS NULL THEN
             CAST(:dateFrom AS DATE) + INTERVAL 1 MONTH
           WHEN :dateTo IS NOT NULL AND :dateFrom IS NULL THEN
