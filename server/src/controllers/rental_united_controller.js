@@ -4,6 +4,7 @@ const {
   addAuthentication,
   convertXmlToJson,
   getDetailedProperties,
+  getDate,
 } = require("../helper/helpers");
 const { sequelize } = require("../../db.config");
 
@@ -14,6 +15,7 @@ const { PropertyImage } = require("../models/property_image_model");
 const { PropertyPaiement } = require("../models/property_paiement_model");
 const { Description } = require("../models/description_model");
 const { Reservation } = require("../models/reservation_model");
+const { PropertyPrice } = require("../models/property_price_model");
 exports.getAll = async (req, res) => {
   var adresse;
   const body = {
@@ -54,6 +56,7 @@ exports.getAll = async (req, res) => {
       listImageProperty,
       listPaiementProperty,
       listDescriptionProperty,
+      listPriceProperty,
     } = await getDetailedProperties(propertiesList);
 
     const createdProperties = [];
@@ -89,6 +92,11 @@ exports.getAll = async (req, res) => {
       createdProperties.push(property);
     }
 
+    await PropertyPrice.destroy({ where: {} });
+    for (const price of listPriceProperty) {
+      // adresse = propAme;
+      await PropertyPrice.bulkCreate(price);
+    }
     await PropertyAmenity.destroy({ where: {} });
     // list association property amenities
     for (const propAme of listPropAmenity) {
@@ -215,14 +223,8 @@ exports.propertyType = async (req, res) => {
 exports.getReservations = async (req, res) => {
   try {
     var listReservations = [];
-    const nowDate = new Date();
-    const oneYearLaterDate = new Date(
-      nowDate.getFullYear() + 1,
-      nowDate.getMonth(),
-      nowDate.getDate()
-    );
-    const nowFormatted = nowDate.toISOString().slice(0, 10);
-    const oneYearLaterFormatted = oneYearLaterDate.toISOString().slice(0, 10);
+    const oneYearLaterFormatted = getDate(1, "years");
+    const nowFormatted = getDate(0, "years");
     const query = `
     SELECT location.id ,location.name, COUNT(location.name) as count FROM location
     JOIN property on location.id = property.location_id

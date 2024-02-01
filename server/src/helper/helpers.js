@@ -37,6 +37,7 @@ async function getDetailedProperties(propertyList) {
   const listImageProperty = [];
   const listPaiementProperty = [];
   const listDescriptionProperty = [];
+  const listPriceProperty = [];
 
   for (const [index, property] of propertyList.entries()) {
     const ID = property.id;
@@ -51,8 +52,40 @@ async function getDetailedProperties(propertyList) {
       },
     };
 
-    const xmlData = convertJsonToXml(body, "Pull_ListProp_RQ");
+    var bodyPrice = {
+      Pull_ListPropertyPrices_RQ: {
+        Authentication: {
+          UserName: process.env.RENTALS_UNITED_LOGIN,
+          Password: process.env.RENTALS_UNITED_PASS,
+        },
+        PropertyID: ID,
+        DateFrom: getDate(0, "years"),
+        DateTo: getDate(1, "years"),
+      },
+    };
+
     try {
+      const xmlData = convertJsonToXml(body, "Pull_ListProp_RQ");
+      const xmlDataPrice = convertJsonToXml(
+        bodyPrice,
+        "Pull_ListPropertyPrices_RQ"
+      );
+      const responsePrice = await axios.post(
+        process.env.RENTALS_UNITED_LINK,
+        xmlDataPrice
+      );
+      var jsonResultPrice = await convertXmlToJson(responsePrice.data);
+      const mappedPriceProperty =
+        jsonResultPrice.Pull_ListPropertyPrices_RS.Prices?.[0]?.Season?.map(
+          (season) => {
+            return {
+              property_id: ID,
+              price: season.Price[0],
+              date_from: season["$"].DateFrom,
+              date_to: season["$"].DateTo,
+            };
+          }
+        );
       const response = await axios.post(
         process.env.RENTALS_UNITED_LINK,
         xmlData
@@ -177,6 +210,8 @@ async function getDetailedProperties(propertyList) {
       if (mappedPaiementProperty)
         listPaiementProperty.push(mappedPaiementProperty);
       if (mappedDescription) listDescriptionProperty.push(mappedDescription);
+      if (mappedPriceProperty) listPriceProperty.push(mappedPriceProperty);
+      console.log(`${index} of ${propertyList.length}`);
     } catch (error) {
       console.error(`Error fetching details for property ${ID}`, error);
     }
@@ -188,6 +223,7 @@ async function getDetailedProperties(propertyList) {
     listImageProperty,
     listPaiementProperty,
     listDescriptionProperty,
+    listPriceProperty,
   };
 }
 
@@ -203,10 +239,27 @@ function getNameFromLocationsById(id) {
   // Return the name if found, otherwise return "Not found"
   return matchingLocation ? matchingLocation.name : "Not found";
 }
+
+function getDate(num, unit) {
+  const newDate = new Date();
+
+  if (unit === "months") {
+    newDate.setMonth(newDate.getMonth() + num);
+  } else if (unit === "years") {
+    newDate.setFullYear(newDate.getFullYear() + num);
+  } else {
+    throw new Error('Invalid unit. Use "months" or "years".');
+  }
+
+  const formattedDate = newDate.toISOString().slice(0, 10);
+  return formattedDate;
+}
+
 module.exports = {
   addAuthentication,
   convertJsonToXml,
   convertXmlToJson,
   getDetailedProperties,
   getNameFromLocationsById,
+  getDate,
 };
