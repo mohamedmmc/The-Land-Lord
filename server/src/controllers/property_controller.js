@@ -68,6 +68,7 @@ exports.getAvailable = async (req, res) => {
         ${isNaN(guest) ? "" : "AND property.standard_guests <= :guest"}
         ${isNaN(room) ? "" : "AND property.can_sleep_max <= :room"}
       GROUP BY property.id, property.name, location.id
+       LIMIT :limit OFFSET :offset;
     `;
 
     const locationList = await sequelize.query(query, {
