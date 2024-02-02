@@ -79,7 +79,6 @@ exports.getAvailable = async (req, res) => {
       GROUP BY property.id, property.name, location.id
       LIMIT :limit OFFSET :offset;
     `;
-    // LIMIT :limit OFFSET :offset;
     const locationList = await sequelize.query(query, {
       type: sequelize.QueryTypes.SELECT,
       replacements: {

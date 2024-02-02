@@ -68442,4 +68442,27 @@ const constantId = {
   ],
 };
 
-module.exports = { constantId };
+const listAmenities = [
+  {
+    id: "227",
+    name: "swimming pool",
+  },
+  {
+    id: "346",
+    name: "garden",
+  },
+  {
+    id: "793",
+    name: "Parking",
+  },
+  {
+    id: "850",
+    name: "Chimney",
+  },
+  {
+    id: "937",
+    name: "Water View",
+  },
+];
+
+module.exports = { constantId, listAmenities };
