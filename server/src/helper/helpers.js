@@ -30,6 +30,15 @@ function convertXmlToJson(xmlData) {
     });
   });
 }
+
+async function getRentalsResponse(body, xmlRoot) {
+  const xmlData = convertJsonToXml(body, xmlRoot);
+  const responseRentalsXml = await axios.post(
+    process.env.RENTALS_UNITED_LINK,
+    xmlData
+  );
+  return await convertXmlToJson(responseRentalsXml.data);
+}
 async function getDetailedProperties(propertyList) {
   const listDetailProperties = [];
   const listPropAmenity = [];
@@ -51,7 +60,6 @@ async function getDetailedProperties(propertyList) {
         PropertyID: ID,
       },
     };
-
     var bodyPrice = {
       Pull_ListPropertyPrices_RQ: {
         Authentication: {
@@ -63,35 +71,20 @@ async function getDetailedProperties(propertyList) {
         DateTo: getDate(1, "years"),
       },
     };
+    var bodyFees = {
+      Pull_GetPropertyAvbPrice_RQ: {
+        Authentication: {
+          UserName: process.env.RENTALS_UNITED_LOGIN,
+          Password: process.env.RENTALS_UNITED_PASS,
+        },
+        PropertyID: ID,
+        DateFrom: getDate(0, "years"),
+        DateTo: getDate(1, "months"),
+      },
+    };
 
     try {
-      const xmlData = convertJsonToXml(body, "Pull_ListProp_RQ");
-      const xmlDataPrice = convertJsonToXml(
-        bodyPrice,
-        "Pull_ListPropertyPrices_RQ"
-      );
-      const responsePrice = await axios.post(
-        process.env.RENTALS_UNITED_LINK,
-        xmlDataPrice
-      );
-      var jsonResultPrice = await convertXmlToJson(responsePrice.data);
-      const mappedPriceProperty =
-        jsonResultPrice.Pull_ListPropertyPrices_RS.Prices?.[0]?.Season?.map(
-          (season) => {
-            return {
-              property_id: ID,
-              price: season.Price[0],
-              date_from: season["$"].DateFrom,
-              date_to: season["$"].DateTo,
-            };
-          }
-        );
-      const response = await axios.post(
-        process.env.RENTALS_UNITED_LINK,
-        xmlData
-      );
-      var jsonResult = await convertXmlToJson(response.data);
-      // return jsonResult;
+      var jsonResult = await getRentalsResponse(body, "Pull_ListProp_RQ");
       // data of detailed property
       const mappedProperties = jsonResult.Pull_ListSpecProp_RS.Property.map(
         (property) => ({
@@ -142,6 +135,28 @@ async function getDetailedProperties(propertyList) {
             ),
         })
       );
+
+      // if (mappedProperties[0].is_active === "true") {
+      var jsonResultFees = await getRentalsResponse(
+        bodyFees,
+        "Pull_GetPropertyAvbPrice_RQ"
+      );
+      var jsonResultPrice = await getRentalsResponse(
+        bodyPrice,
+        "Pull_ListPropertyPrices_RQ"
+      );
+
+      const mappedPriceProperty =
+        jsonResultPrice.Pull_ListPropertyPrices_RS.Prices?.[0]?.Season?.map(
+          (season) => {
+            return {
+              property_id: ID,
+              price: season.Price[0],
+              date_from: season["$"].DateFrom,
+              date_to: season["$"].DateTo,
+            };
+          }
+        );
 
       // data of table association amenities and property
       const mappedPropAmenity =
@@ -212,6 +227,7 @@ async function getDetailedProperties(propertyList) {
       if (mappedDescription) listDescriptionProperty.push(mappedDescription);
       if (mappedPriceProperty) listPriceProperty.push(mappedPriceProperty);
       console.log(`${index} of ${propertyList.length}`);
+      // }
     } catch (error) {
       console.error(`Error fetching details for property ${ID}`, error);
     }
@@ -225,19 +241,6 @@ async function getDetailedProperties(propertyList) {
     listDescriptionProperty,
     listPriceProperty,
   };
-}
-
-// Function to get the name from the Locations list by ID
-function getNameFromLocationsById(id) {
-  const locationsList = constantId.Locations;
-
-  // Find the object with the matching ID
-  const matchingLocation = locationsList.find(
-    (location) => location.LocationID === id
-  );
-
-  // Return the name if found, otherwise return "Not found"
-  return matchingLocation ? matchingLocation.name : "Not found";
 }
 
 function getDate(num, unit) {
@@ -290,7 +293,7 @@ module.exports = {
   convertJsonToXml,
   convertXmlToJson,
   getDetailedProperties,
-  getNameFromLocationsById,
   getDate,
   calculateDateDifference,
+  getRentalsResponse,
 };

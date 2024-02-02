@@ -5,6 +5,7 @@ const {
   convertXmlToJson,
   getDetailedProperties,
   getDate,
+  getRentalsResponse,
 } = require("../helper/helpers");
 const { sequelize } = require("../../db.config");
 
@@ -19,27 +20,20 @@ const { PropertyPrice } = require("../models/property_price_model");
 exports.getAll = async (req, res) => {
   var adresse;
   const body = {
-    Pull_ListProp_RQ: {},
+    Pull_ListProp_RQ: {
+      Authentication: {
+        UserName: process.env.RENTALS_UNITED_LOGIN,
+        Password: process.env.RENTALS_UNITED_PASS,
+      },
+    },
   };
   if (!body) {
     return res.status(400).send("missing_argument");
   }
 
   try {
-    const xmlData = convertJsonToXml(
-      addAuthentication(body, "Pull_ListProp_RQ")
-    );
+    const propertyListJson = await getRentalsResponse(body, "Pull_ListProp_RQ");
 
-    const apiResponse = await axios.post(
-      process.env.RENTALS_UNITED_LINK,
-      xmlData,
-      {
-        headers: {
-          "Content-Type": "text/xml",
-        },
-      }
-    );
-    const propertyListJson = await convertXmlToJson(apiResponse.data);
     const propertiesList =
       propertyListJson.Pull_ListProp_RS.Properties[0].Property.map(
         (property) => ({
@@ -186,23 +180,19 @@ exports.location = async (req, res) => {
 exports.propertyType = async (req, res) => {
   try {
     const body = {
-      Pull_ListPropTypes_RQ: {},
+      Pull_ListPropTypes_RQ: {
+        Authentication: {
+          UserName: process.env.RENTALS_UNITED_LOGIN,
+          Password: process.env.RENTALS_UNITED_PASS,
+        },
+      },
     };
-    const xmlData = convertJsonToXml(
-      addAuthentication(body, "Pull_ListPropTypes_RQ")
+    const propertyListJson = await getRentalsResponse(
+      body,
+      "Pull_ListPropTypes_RQ"
     );
 
-    const apiResponse = await axios.post(
-      process.env.RENTALS_UNITED_LINK,
-      xmlData,
-      {
-        headers: {
-          "Content-Type": "text/xml",
-        },
-      }
-    );
     var listPropertyType = [];
-    const propertyListJson = await convertXmlToJson(apiResponse.data);
     for (const detailedProperty of propertyListJson.Pull_ListPropTypes_RS
       .PropertyTypes[0].PropertyType) {
       const name = detailedProperty._;
@@ -247,17 +237,11 @@ exports.getReservations = async (req, res) => {
           DateTo: oneYearLaterFormatted,
         },
       };
-      const xmlData = convertJsonToXml(body);
-      const apiResponse = await axios.post(
-        process.env.RENTALS_UNITED_LINK,
-        xmlData,
-        {
-          headers: {
-            "Content-Type": "text/xml",
-          },
-        }
+      const propertyListJson = await getRentalsResponse(
+        body,
+        "Pull_ListPropertiesBlocks_RQ"
       );
-      const propertyListJson = await convertXmlToJson(apiResponse.data);
+
       if (propertyListJson.Pull_ListPropertiesBlocks_RS.Properties[0] !== "")
         for (const propertyReservation of propertyListJson
           .Pull_ListPropertiesBlocks_RS.Properties?.[0]?.PropertyBlock) {
