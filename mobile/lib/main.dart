@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import 'services/main_app_service.dart';
 import 'utils/logger_service.dart';
 import 'utils/shared_preferences.dart';
-import 'views/booking_screen.dart';
 import 'views/properties/properties_controller.dart';
 
 void main() {
@@ -43,11 +42,11 @@ class MyApp extends StatelessWidget {
           page: () => const PropertiesScreen(),
           binding: BindingsBuilder.put(() => PropertiesController()),
         ),
-        GetPage(
-          name: BookingDetailsScreen.routeName,
-          page: () => const BookingDetailsScreen(),
-          // binding: BindingsBuilder.put(() => PropertiesController()),
-        ),
+        // GetPage(
+        //   name: BookingDetailsScreen.routeName,
+        //   page: () => const BookingDetailsScreen(),
+        //   // binding: BindingsBuilder.put(() => PropertiesController()),
+        // ),
         // GoRoute(
         //   name: 'booking-details',
         //   path: '/booking-details',

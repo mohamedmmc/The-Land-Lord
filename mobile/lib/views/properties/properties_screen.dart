@@ -1,4 +1,3 @@
-import 'package:the_land_lord_website/models/property.dart';
 import 'package:the_land_lord_website/models/property_filter_model.dart';
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
 import 'package:the_land_lord_website/utils/theme/theme.dart';
@@ -17,6 +16,7 @@ import '../../utils/constants/constants.dart';
 import '../../utils/enums/property_type.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/custom_dropdown.dart';
+import '../../widgets/custom_marker.dart';
 
 class PropertiesScreen extends StatelessWidget {
   final PropertyFilterModel? filter;
@@ -249,7 +249,7 @@ class PropertiesScreen extends StatelessWidget {
                                       return Marker(
                                         point: property.coordinates!,
                                         alignment: Alignment.center,
-                                        width: 80,
+                                        width: 90,
                                         height: 30,
                                         child: BuildCustomMarker(property, controller.propertiesMarkerLayer[index], controller.mapController),
                                       );
@@ -265,94 +265,6 @@ class PropertiesScreen extends StatelessWidget {
                   ),
                 ),
         ),
-      ),
-    );
-  }
-}
-
-class BuildCustomMarker extends StatefulWidget {
-  final Property property;
-  final MapController mapController;
-  final LayerLink layerLink;
-
-  const BuildCustomMarker(this.property, this.layerLink, this.mapController, {super.key});
-
-  @override
-  State<BuildCustomMarker> createState() => _BuildCustomMarkerState();
-}
-
-class _BuildCustomMarkerState extends State<BuildCustomMarker> {
-  Future<bool> openMarkerPopup(Property property, LayerLink markerLink, {bool close = false}) async {
-    final bool = widget.mapController.move(property.coordinates!, 14);
-    if (!close) {
-      double width = 200;
-      double height = 220;
-      Get.dialog(
-        barrierColor: Colors.transparent,
-        AlertDialog(
-          backgroundColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent,
-          content: CompositedTransformFollower(
-            targetAnchor: Alignment.topLeft,
-            offset: Offset(-(width / 3.5) - 20, -height - 5),
-            link: markerLink,
-            child: Container(
-              padding: const EdgeInsets.all(Paddings.small).copyWith(top: Paddings.regular),
-              height: height,
-              decoration: BoxDecoration(borderRadius: regularRadius, color: kNeutralColor100),
-              child: Center(child: PropertyCard(property: property, width: width, height: height)),
-            ),
-          ),
-          // Stack(
-          //   children: [
-          //     SizedBox(
-          //       width: 400,
-          //       height: 170,
-          //       child: DecoratedBox(decoration: BoxDecoration(color: kNeutralLightColor)),
-          //     ),
-          //     Positioned(
-          //       top: 5,
-          //       right: 5,
-          //       child: CustomButtons.icon(
-          //         icon: const Icon(Icons.close, color: kNeutralColor100),
-          //         onPressed: () => openMarkerPopup(property, markerLink, close: true),
-          //       ),
-          //     ),
-          //   ],
-          // ),
-        ),
-      );
-    } else if (Get.isDialogOpen ?? false) {
-      Get.back();
-    }
-    return bool;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 80,
-      height: 30,
-      child: Stack(
-        children: [
-          CompositedTransformTarget(
-            link: widget.layerLink,
-            child: SizedBox(
-              width: 80,
-              height: 30,
-              child: InkWell(
-                onTap: () => openMarkerPopup(widget.property, widget.layerLink),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(color: kNeutralColor100, borderRadius: circularRadius, border: regularBorder),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: Paddings.regular, vertical: Paddings.small),
-                    child: Text('${widget.property.pricePerNight ?? 280} TND', style: AppFonts.x14Bold),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
