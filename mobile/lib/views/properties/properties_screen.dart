@@ -98,6 +98,7 @@ class PropertiesScreen extends StatelessWidget {
                                                     for (int index = 0; index < controller.filteredProperties.length; index++)
                                                       PropertyCard(
                                                         property: controller.filteredProperties[index],
+                                                        filtred: controller.filter.checkin != null,
                                                         key: Key(controller.filteredProperties[index].id.toString()),
                                                       )
                                                   ],
@@ -292,8 +293,8 @@ class _BuildCustomMarkerState extends State<BuildCustomMarker> {
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
           content: CompositedTransformFollower(
-            targetAnchor: Alignment.topCenter,
-            offset: Offset(-(width / 2) - 20, -height - 5),
+            targetAnchor: Alignment.topLeft,
+            offset: Offset(-(width / 3.5) - 20, -height - 5),
             link: markerLink,
             child: Container(
               padding: const EdgeInsets.all(Paddings.small).copyWith(top: Paddings.regular),

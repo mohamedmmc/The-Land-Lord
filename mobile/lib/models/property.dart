@@ -15,7 +15,7 @@ class Property {
   bool? petsAllowed;
   List<String>? amenities;
   String? description;
-  int? pricePerNight;
+  double? pricePerNight;
   double? rating;
   int? reviews;
   String? houseRules;
@@ -54,7 +54,7 @@ class Property {
     petsAllowed = json['petsAllowed'];
     amenities = json['amenities'];
     description = json['description'];
-    pricePerNight = json['pricePerNight'];
+    pricePerNight = double.parse(json['price']);
     amenities = json['amenities'];
     rating = json['rating'] != null ? double.parse(json['rating']) : null;
     reviews = json['reviews'];

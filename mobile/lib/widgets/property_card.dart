@@ -14,7 +14,8 @@ class PropertyCard extends StatelessWidget {
   final Property property;
   final double? width;
   final double? height;
-  const PropertyCard({super.key, required this.property, this.width, this.height});
+  final bool filtred;
+  const PropertyCard({super.key, required this.property, this.width, this.height, this.filtred =false});
 
   @override
   Widget build(BuildContext context) {
@@ -107,8 +108,9 @@ class PropertyCard extends StatelessWidget {
                 text: '',
                 style: AppFonts.x14Regular,
                 children: [
+                  if (!filtred) TextSpan(text: 'From  '),
                   TextSpan(text: '${property.pricePerNight ?? 0} TND', style: AppFonts.x14Bold),
-                  const TextSpan(text: '/night • duration_cost'),
+                  if (filtred) TextSpan(text: '/night • duration_cost'),
                 ],
               ),
             ),
