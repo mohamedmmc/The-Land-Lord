@@ -38,7 +38,7 @@ class PropertyCard extends StatelessWidget {
                     child: property.imagePath != null && property.imagePath!.isNotEmpty
                         ? Swiper(
                             itemBuilder: (_, int i) => Image.network(
-                              property.imagePath![i],
+                              "http://localhost:8080/" + property.imagePath![i],
                               height: height != null ? height! - 120 : 200,
                               width: width ?? 250,
                               fit: BoxFit.cover,
