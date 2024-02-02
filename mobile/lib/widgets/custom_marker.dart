@@ -28,18 +28,24 @@ class _BuildCustomMarkerState extends State<BuildCustomMarker> {
       double height = 220;
       Get.dialog(
         barrierColor: Colors.transparent,
+        barrierDismissible: false,
         AlertDialog(
+          // actions: const [Icon(Icons.search)],
+          alignment: Alignment.centerRight,
           backgroundColor: Colors.transparent,
           surfaceTintColor: Colors.transparent,
+          contentPadding: const EdgeInsets.all(100),
           content: CompositedTransformFollower(
             targetAnchor: Alignment.topLeft,
             offset: Offset(-(width / 3.5) - 15, -height - 5),
             link: markerLink,
             child: Container(
-              padding: const EdgeInsets.all(Paddings.small).copyWith(top: Paddings.regular),
+              padding: const EdgeInsets.all(Paddings.regular),
               height: height,
               decoration: BoxDecoration(borderRadius: regularRadius, color: kNeutralColor100),
-              child: Center(child: PropertyCard(property: property, width: width, height: height)),
+              child: Center(
+                child: PropertyCard(property: property, width: width, height: height),
+              ),
             ),
           ),
         ),

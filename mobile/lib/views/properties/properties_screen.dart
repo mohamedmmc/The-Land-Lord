@@ -1,4 +1,5 @@
 import 'package:the_land_lord_website/models/property_filter_model.dart';
+import 'package:the_land_lord_website/services/main_app_service.dart';
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
 import 'package:the_land_lord_website/utils/theme/theme.dart';
 import 'package:the_land_lord_website/widgets/property_card.dart';
@@ -13,7 +14,6 @@ import '../../helpers/helper.dart';
 import '../../utils/constants/assets.dart';
 import '../../utils/constants/colors.dart';
 import '../../utils/constants/constants.dart';
-import '../../utils/enums/property_type.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/custom_dropdown.dart';
 import '../../widgets/custom_marker.dart';
@@ -51,6 +51,7 @@ class PropertiesScreen extends StatelessWidget {
                           flex: 5,
                           child: LayoutBuilder(
                             builder: (_, constraints) => SingleChildScrollView(
+                              controller: controller.scrollController,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -70,7 +71,7 @@ class PropertiesScreen extends StatelessWidget {
                                   ),
                                   PropertyFilterWidget(
                                     updateFilter: (filter) {
-                                      if (filter.location == null && controller.filter.location != null) controller.filter.location = null;
+                                      if (filter.location == null && controller.filter?.location != null) controller.filter?.location = null;
                                       controller.updateFilter(filterModel: filter);
                                     },
                                     constraints: constraints,
@@ -98,7 +99,7 @@ class PropertiesScreen extends StatelessWidget {
                                                     for (int index = 0; index < controller.filteredProperties.length; index++)
                                                       PropertyCard(
                                                         property: controller.filteredProperties[index],
-                                                        filtred: controller.filter.checkin != null,
+                                                        filtred: controller.filter?.checkin != null,
                                                         key: Key(controller.filteredProperties[index].id.toString()),
                                                       )
                                                   ],
@@ -120,17 +121,18 @@ class PropertiesScreen extends StatelessWidget {
                                                     child: CustomDropDownMenu(
                                                       buttonHeight: 50,
                                                       maxWidth: true,
-                                                      hint: controller.filter.rooms != null ? '${controller.filter.rooms} Chambres' : 'Chambres',
+                                                      hint: controller.filter?.rooms != null ? '${controller.filter?.rooms} Chambres' : 'Chambres',
                                                       items: [
                                                         'Clear',
-                                                        ...[1, 2, 3, 4, 5].map((e) => e.toString())
+                                                        ...[1, 2, 3, 4, 5].map((e) => e == 5 ? '5+' : e.toString())
                                                       ],
-                                                      selectedItem: controller.filter.rooms,
+                                                      selectedItem: controller.filter?.rooms,
                                                       onChanged: (value) {
                                                         if (value == 'Clear') {
-                                                          controller.filter.rooms = null;
+                                                          controller.filter?.rooms = null;
                                                           controller.updateFilter();
                                                         } else {
+                                                          if (value.toString().contains('+')) value = value.toString().substring(0, 1);
                                                           controller.updateFilter(rooms: int.parse(value.toString()));
                                                         }
                                                       },
@@ -141,17 +143,18 @@ class PropertiesScreen extends StatelessWidget {
                                                     child: CustomDropDownMenu(
                                                       maxWidth: true,
                                                       buttonHeight: 50,
-                                                      hint: controller.filter.beds != null ? '${controller.filter.beds} Lits' : 'Lits',
+                                                      hint: controller.filter?.beds != null ? '${controller.filter?.beds} Lits' : 'Lits',
                                                       items: [
                                                         'Clear',
-                                                        ...[1, 2, 3, 4, 5].map((e) => e.toString())
+                                                        ...[1, 2, 3, 4, 5].map((e) => e == 5 ? '5+' : e.toString())
                                                       ],
-                                                      selectedItem: controller.filter.beds,
+                                                      selectedItem: controller.filter?.beds,
                                                       onChanged: (value) {
                                                         if (value == 'Clear') {
-                                                          controller.filter.beds = null;
+                                                          controller.filter?.beds = null;
                                                           controller.updateFilter();
                                                         } else {
+                                                          if (value.toString().contains('+')) value = value.toString().substring(0, 1);
                                                           controller.updateFilter(beds: int.parse(value.toString()));
                                                         }
                                                       },
@@ -162,15 +165,15 @@ class PropertiesScreen extends StatelessWidget {
                                                     child: CustomDropDownMenu(
                                                       maxWidth: true,
                                                       buttonHeight: 50,
-                                                      hint: controller.filter.type != null ? controller.filter.type!.value : 'Type',
-                                                      selectedItem: controller.filter.type?.value,
-                                                      items: ['Clear', ...PropertyType.values.map((e) => e.value).toList()],
+                                                      hint: controller.filter?.type != null ? MainAppServie.find.getTypeNameById(controller.filter!.type!) : 'Type',
+                                                      selectedItem: controller.filter?.type != null ? MainAppServie.find.getTypeNameById(controller.filter!.type!) : null,
+                                                      items: ['Clear', ...MainAppServie.find.filterData?.propertyTypelist.map((e) => e.name).toList() ?? []],
                                                       onChanged: (value) {
                                                         if (value == 'Clear') {
-                                                          controller.filter.type = null;
+                                                          controller.filter?.type = null;
                                                           controller.updateFilter();
                                                         } else {
-                                                          controller.updateFilter(type: PropertyType.values.singleWhere((element) => element.value == value));
+                                                          controller.updateFilter(type: MainAppServie.find.getTypeIdByName(value.toString()));
                                                         }
                                                       },
                                                     ),
@@ -196,18 +199,21 @@ class PropertiesScreen extends StatelessWidget {
                                                           runSpacing: 15,
                                                           spacing: 10,
                                                           children: List.generate(
-                                                            extraPropertyFilters.length,
-                                                            (index) => SizedBox(
-                                                              height: 40,
-                                                              width: 250,
-                                                              child: ListTile(
-                                                                title: Text(extraPropertyFilters[index]),
-                                                                leading: Checkbox(
-                                                                  onChanged: (value) {},
-                                                                  value: false,
+                                                            MainAppServie.find.filterData?.listAmenities.length ?? 0,
+                                                            (index) {
+                                                              var amenity = MainAppServie.find.filterData!.listAmenities[index];
+                                                              return SizedBox(
+                                                                height: 40,
+                                                                width: 250,
+                                                                child: ListTile(
+                                                                  title: Text(amenity.name),
+                                                                  leading: Checkbox(
+                                                                    onChanged: (value) => controller.updateFilter(amenity: {'amenity': amenity, 'value': value}),
+                                                                    value: controller.filter?.amenities.any((element) => element.id == amenity.id) ?? false,
+                                                                  ),
                                                                 ),
-                                                              ),
-                                                            ),
+                                                              );
+                                                            },
                                                           ),
                                                         ),
                                                       ),
@@ -233,8 +239,8 @@ class PropertiesScreen extends StatelessWidget {
                             child: FlutterMap(
                               mapController: controller.mapController,
                               options: MapOptions(
-                                initialCenter: controller.calculateMidPoint()['midPoint'],
-                                initialZoom: controller.calculateMidPoint()['zoomLevel'],
+                                initialCenter: controller.calculateMidPoint()?['midPoint'] ?? tesaLocation,
+                                initialZoom: controller.calculateMidPoint()?['zoomLevel'] ?? 13,
                                 onTap: (_, pos) {
                                   // Helper.launchUrlHelper('https://maps.google.com/?q=${tesaLocation.latitude},${tesaLocation.longitude}');
                                 },

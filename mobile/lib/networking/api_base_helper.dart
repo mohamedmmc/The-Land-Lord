@@ -83,15 +83,7 @@ class ApiBaseHelper {
     return _returnResponse(response);
   }
 
-  String getImageUrl(String pictureName) => '$_baseUrl/public/$pictureName';
-
-  String getImagePlayer(String pictureName) => '$_baseUrl/public/players/avatars/$pictureName';
-
-  String getImageCharacter(String pictureName, String gameName) => '$_baseUrl/public/games/$gameName/char/$pictureName';
-
-  String getImageFlags(String pictureName) => '$_baseUrl/public/flags/$pictureName';
-
-  String getImageNews(String pictureName) => '$_baseUrl/public/news/$pictureName';
+  String getImageUrl(String pictureName) => 'http://localhost:8080/$pictureName';
 }
 
 dynamic _returnResponse(http.Response response) {

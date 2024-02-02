@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:latlong2/latlong.dart';
+import 'package:the_land_lord_website/networking/api_base_helper.dart';
 
 class Property {
   String? id;
@@ -49,7 +50,7 @@ class Property {
     guests = int.tryParse(json['guests']);
     beds = json['beds'] != null ? int.tryParse(json['beds']) : null;
     rooms = json['rooms'] != null ? int.tryParse(json['rooms']) : null;
-    imagePath = (json['images'] as List).map((e) => e.toString()).toList();
+    imagePath = (json['images'] as List).map((e) => ApiBaseHelper().getImageUrl(e)).toList();
     bathrooms = json['bathrooms'];
     petsAllowed = json['petsAllowed'];
     amenities = json['amenities'];

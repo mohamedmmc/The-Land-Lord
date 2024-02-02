@@ -6,5 +6,6 @@ class Guest {
 
   Guest({this.adults = 1, this.children = 0, this.infants = 0, this.pets = 0});
 
-  String get total => '${adults + children + infants + pets} Guests';
+  String get total => '${adults + children + infants} Guests';
+  int get totalGuests => adults + children + infants;
 }

@@ -1,6 +1,6 @@
 import 'package:intl/intl.dart';
+import 'package:the_land_lord_website/models/filter_data.dart';
 
-import '../utils/enums/property_type.dart';
 import 'guest.dart';
 
 class PropertyFilterModel {
@@ -10,7 +10,8 @@ class PropertyFilterModel {
   final Guest guest;
   int? rooms;
   int? beds;
-  PropertyType? type;
+  int? type;
+  List<Amenity> amenities;
 
   String? get getDuration {
     if (checkin == null && checkout == null) return null;
@@ -22,5 +23,7 @@ class PropertyFilterModel {
     }
   }
 
-  PropertyFilterModel({this.location, this.checkin, this.checkout, this.beds, this.rooms, this.type, Guest? guest}) : guest = guest ?? Guest();
+  PropertyFilterModel({this.location, this.checkin, this.checkout, this.beds, this.rooms, this.type, Guest? guest, List<Amenity>? amenitiesList})
+      : guest = guest ?? Guest(),
+        amenities = amenitiesList ?? [];
 }

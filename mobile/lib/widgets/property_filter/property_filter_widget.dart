@@ -1,4 +1,5 @@
 import 'package:the_land_lord_website/models/property_filter_model.dart';
+import 'package:the_land_lord_website/services/main_app_service.dart';
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
 import 'package:the_land_lord_website/widgets/custom_buttons.dart';
 import 'package:the_land_lord_website/widgets/property_filter/property_filter_controller.dart';
@@ -122,7 +123,7 @@ class PropertyFilterWidget extends StatelessWidget {
                                       children: [
                                         Text('Where to?', style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold)),
                                         Text(
-                                          '${controller.currentSelection.location ?? 'Anywhere'} • ${controller.currentSelection.getDuration ?? 'Any week'} • ${controller.currentSelection.guest.total}',
+                                          '${controller.currentSelection.location != null ? MainAppServie.find.getLocationNameById(controller.currentSelection.location!) : 'Anywhere'} • ${controller.currentSelection.getDuration ?? 'Any week'} • ${controller.currentSelection.guest.total}',
                                           style: textTheme.bodyMedium,
                                         ),
                                       ],
