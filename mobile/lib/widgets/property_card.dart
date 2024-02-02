@@ -15,7 +15,7 @@ class PropertyCard extends StatelessWidget {
   final double? width;
   final double? height;
   final bool filtred;
-  const PropertyCard({super.key, required this.property, this.width, this.height, this.filtred =false});
+  const PropertyCard({super.key, required this.property, this.width, this.height, this.filtred = false});
 
   @override
   Widget build(BuildContext context) {
@@ -35,30 +35,30 @@ class PropertyCard extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: regularRadius,
-                    child: Swiper(
-                      itemBuilder: (_, int i) => Image.network(
-                        property.imagePath![i],
-                        height: height != null ? height! - 120 : 200,
-                        width: width ?? 250,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, error, stackTrace) => Image.asset(
-                          "assets/images/no_image.jpg",
-                          height: height != null ? height! - 120 : 200,
-                          width: width ?? 250,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      itemCount: property.imagePath?.length ?? 1,
-                      pagination: const SwiperPagination(),
-                      control: const SwiperControl(), // TODO Customize this
-                    ),
-                    // Image.asset(
-                    //   'assets/images/house$index.jpeg',
-                    //   height: height != null ? height! - 120 : 200,
-                    //   width: width ?? 250,
-                    //   fit: BoxFit.cover,
-                    //   errorBuilder: (_, error, stackTrace) => Image.asset("assets/images/no_image.jpg"),
-                    // ),
+                    child: property.imagePath != null && property.imagePath!.isNotEmpty
+                        ? Swiper(
+                            itemBuilder: (_, int i) => Image.network(
+                              property.imagePath![i],
+                              height: height != null ? height! - 120 : 200,
+                              width: width ?? 250,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, error, stackTrace) => Image.asset(
+                                "assets/images/no_image.jpg",
+                                height: height != null ? height! - 120 : 200,
+                                width: width ?? 250,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            itemCount: property.imagePath?.length ?? 1,
+                            pagination: const SwiperPagination(),
+                            control: const SwiperControl(), // TODO Customize this
+                          )
+                        : Image.asset(
+                            "assets/images/no_image.jpg",
+                            height: height != null ? height! - 120 : 200,
+                            width: width ?? 250,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                   Positioned(
                     right: Paddings.regular,
@@ -70,7 +70,9 @@ class PropertyCard extends StatelessWidget {
                           const Icon(Icons.favorite_outline, color: kNeutralColor100),
                         ],
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        // TODO add favorite logic
+                      },
                     ),
                   ),
                 ],
@@ -108,9 +110,10 @@ class PropertyCard extends StatelessWidget {
                 text: '',
                 style: AppFonts.x14Regular,
                 children: [
-                  if (!filtred) TextSpan(text: 'From  '),
+                  if (!filtred) const TextSpan(text: 'From  '),
                   TextSpan(text: '${property.pricePerNight ?? 0} TND', style: AppFonts.x14Bold),
-                  if (filtred) TextSpan(text: '/night • duration_cost'),
+                  const TextSpan(text: '/night'),
+                  if (filtred) const TextSpan(text: ' • duration_cost'),
                 ],
               ),
             ),
