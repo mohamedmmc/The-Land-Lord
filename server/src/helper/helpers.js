@@ -71,20 +71,9 @@ async function getDetailedProperties(propertyList) {
         DateTo: getDate(1, "years"),
       },
     };
-    var bodyFees = {
-      Pull_GetPropertyAvbPrice_RQ: {
-        Authentication: {
-          UserName: process.env.RENTALS_UNITED_LOGIN,
-          Password: process.env.RENTALS_UNITED_PASS,
-        },
-        PropertyID: ID,
-        DateFrom: getDate(0, "years"),
-        DateTo: getDate(1, "months"),
-      },
-    };
 
     try {
-      var jsonResult = await getRentalsResponse(body, "Pull_ListProp_RQ");
+      var jsonResult = await getRentalsResponse(body, "Pull_ListSpecProp_RQ");
       // data of detailed property
       const mappedProperties = jsonResult.Pull_ListSpecProp_RS.Property.map(
         (property) => ({
@@ -137,10 +126,6 @@ async function getDetailedProperties(propertyList) {
       );
 
       // if (mappedProperties[0].is_active === "true") {
-      var jsonResultFees = await getRentalsResponse(
-        bodyFees,
-        "Pull_GetPropertyAvbPrice_RQ"
-      );
       var jsonResultPrice = await getRentalsResponse(
         bodyPrice,
         "Pull_ListPropertyPrices_RQ"

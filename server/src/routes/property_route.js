@@ -5,6 +5,7 @@ module.exports = (app) => {
 
   // insert elements in the database
   router.get("/", propertyController.getAvailable);
+  router.get("/detail/:id", propertyController.getDetail);
 
   app.use("/api/property", router);
 };

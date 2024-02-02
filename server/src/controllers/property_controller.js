@@ -29,6 +29,7 @@ exports.getAvailable = async (req, res) => {
       SELECT
         property.id,
         property.name AS name,
+        property.cleaning_price,
         SUBSTRING_INDEX(GROUP_CONCAT(property_image.url ORDER BY property_image.url ASC SEPARATOR ','), ',', 3) AS image_urls,
         description.house_rules,
         description.text,
@@ -115,7 +116,9 @@ exports.getAvailable = async (req, res) => {
       .map((row) => ({
         id: row.id,
         name: row.name,
-        price: String(row.price * devise),
+        price: String(
+          (parseInt(row.price) + parseInt(row.cleaning_price)) * devise
+        ),
         location: row.location,
         coordinates: row.coordinates,
         images: row.image_urls.split(","),
@@ -130,6 +133,14 @@ exports.getAvailable = async (req, res) => {
   }
 };
 
+exports.getDetail = async (req, res) => {
+  const body = {};
+  try {
+    return res.status(200).json({ formattedList });
+  } catch (error) {
+    return res.status(500).json({ message: error });
+  }
+};
 // Function to check if the property has the desired amenities
 function hasDesiredAmenities(propertyAmenities, desiredAmenities) {
   if (!propertyAmenities) {
