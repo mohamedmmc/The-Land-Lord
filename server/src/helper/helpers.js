@@ -255,6 +255,36 @@ function getDate(num, unit) {
   return formattedDate;
 }
 
+function calculateDateDifference(date1Str, date2Str, unit = "days") {
+  const date1 = new Date(date1Str);
+  const date2 = new Date(date2Str);
+
+  if (isNaN(date1.getTime()) || isNaN(date2.getTime())) {
+    throw new Error("Invalid date format. Please use YYYY-MM-DD.");
+  }
+
+  const differenceInMilliseconds = Math.abs(date2.getTime() - date1.getTime());
+
+  switch (unit) {
+    case "days":
+      return Math.floor(differenceInMilliseconds / (1000 * 60 * 60 * 24));
+    case "weeks":
+      return Math.floor(differenceInMilliseconds / (1000 * 60 * 60 * 24 * 7));
+    case "months":
+      const monthDifference =
+        date2.getFullYear() * 12 +
+        date2.getMonth() -
+        (date1.getFullYear() * 12 + date1.getMonth());
+      return monthDifference;
+    case "years":
+      return date2.getFullYear() - date1.getFullYear();
+    default:
+      throw new Error(
+        "Invalid unit. Use 'days', 'weeks', 'months', or 'years'."
+      );
+  }
+}
+
 module.exports = {
   addAuthentication,
   convertJsonToXml,
@@ -262,4 +292,5 @@ module.exports = {
   getDetailedProperties,
   getNameFromLocationsById,
   getDate,
+  calculateDateDifference,
 };

@@ -40,7 +40,7 @@ exports.getAvailable = async (req, res) => {
       LEFT JOIN property_price ON property.id = property_price.property_id AND CAST(:dateFrom AS DATE) BETWEEN property_price.date_from AND property_price.date_to
       WHERE property.is_active = 'true'
       ${
-        dateFrom || dateTo
+        dateFrom && dateTo
           ? `AND (
           CASE WHEN :dateFrom IS NOT NULL AND :dateTo IS NULL THEN
             CAST(:dateFrom AS DATE) + INTERVAL 1 MONTH
@@ -61,7 +61,6 @@ exports.getAvailable = async (req, res) => {
         )`
           : ""
       }
-
         ${
           petAllowed !== undefined
             ? "AND description.house_rules LIKE :petAllowed"
@@ -72,27 +71,27 @@ exports.getAvailable = async (req, res) => {
             ? "AND description.house_rules LIKE :smokeAllowed"
             : ""
         }
-        ${isNaN(location) ? "" : "AND property.location_id = :location"}
-        ${isNaN(guest) ? "" : "AND property.standard_guests = :guest"}
-        ${isNaN(room) ? "" : "AND property.can_sleep_max = :room"}
-        ${isNaN(priceMax) ? "" : "AND property_price.price <= :priceMax"}
-        ${isNaN(priceMin) ? "" : "AND property_price.price >= :priceMin"}
+        ${!location ? "" : "AND property.location_id = :location"}
+        ${!guest ? "" : "AND property.standard_guests = :guest"}
+        ${!room ? "" : "AND property.can_sleep_max = :room"}
+        ${!priceMax ? "" : "AND property_price.price <= :priceMax"}
+        ${!priceMin ? "" : "AND property_price.price >= :priceMin"}
       GROUP BY property.id, property.name, location.id
-       
+      LIMIT :limit OFFSET :offset;
     `;
     // LIMIT :limit OFFSET :offset;
     const locationList = await sequelize.query(query, {
       type: sequelize.QueryTypes.SELECT,
       replacements: {
-        location: location,
-        guest: guest,
-        room: room,
+        location: location ?? parseInt,
+        guest: guest ?? parseInt,
+        room: room ?? parseInt,
         offset: offset,
         dateFrom: dateFrom ?? getDate(0, "years"),
         dateTo: dateTo ?? null,
         limit: limit,
-        priceMax: parseInt(priceMax),
-        priceMin: parseInt(priceMin),
+        priceMax: priceMax ?? parseInt(priceMax),
+        priceMin: priceMin ?? parseInt(priceMin),
         petAllowed: `%Pets - ${petAllowed}%`,
         smokeAllowed: `%Smoking - ${smokeAllowed}%`,
       },
@@ -101,7 +100,7 @@ exports.getAvailable = async (req, res) => {
     const formattedList = locationList.map((row) => ({
       id: row.id,
       name: row.name,
-      price: row.price,
+      price: String(row.price * 3.1),
       location: row.location,
       coordinates: row.coordinates,
       images: row.image_urls.split(","),
