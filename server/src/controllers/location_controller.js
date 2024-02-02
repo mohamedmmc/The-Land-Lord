@@ -13,7 +13,7 @@ exports.getByAvailableProperty = async (req, res) => {
       type: sequelize.QueryTypes.SELECT,
     });
     const queryPropertyType = `
-    select property.type_property_id, type_property.name,  COUNT(type_property.name) as count 
+    select type_property.id, type_property.name,  COUNT(type_property.name) as count 
     from property
     JOIN type_property on property.type_property_id = type_property.id
     GROUP by property.type_property_id
