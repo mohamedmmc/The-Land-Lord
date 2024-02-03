@@ -30,7 +30,7 @@ exports.getAvailable = async (req, res) => {
         property.id,
         property.name AS name,
         property.cleaning_price,
-        SUBSTRING_INDEX(GROUP_CONCAT(property_image.url ORDER BY property_image.url ASC SEPARATOR ','), ',', 3) AS image_urls,
+        SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT property_image.url ORDER BY property_image.id ASC SEPARATOR ','), ',', 3) AS image_urls,
         description.house_rules,
         description.text,
         property.can_sleep_max,
