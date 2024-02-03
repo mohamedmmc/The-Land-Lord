@@ -28,7 +28,6 @@ class _BuildCustomMarkerState extends State<BuildCustomMarker> {
       double height = 220;
       Get.dialog(
         barrierColor: Colors.transparent,
-        barrierDismissible: false,
         AlertDialog(
           // actions: const [Icon(Icons.search)],
           alignment: Alignment.centerRight,
