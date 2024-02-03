@@ -118,7 +118,7 @@ class PropertiesController extends GetxController {
       limit: 8,
       from: filter?.checkin != null ? DateFormat('yyyy-MM-dd').format(filter!.checkin!) : null,
       to: filter?.checkout != null ? DateFormat('yyyy-MM-dd').format(filter!.checkout!) : null,
-      guest: filter?.guest.totalGuests,
+      guest: filter?.guest.totalGuests == 1 ? null : filter?.guest.totalGuests,
       locationId: filter?.location,
       petAllowed: filter!.guest.pets > 0 ? true : null,
       room: filter?.rooms,
