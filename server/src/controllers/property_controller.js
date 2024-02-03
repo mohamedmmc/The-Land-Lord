@@ -1,5 +1,5 @@
 const { sequelize } = require("../../db.config");
-const { getDate } = require("../helper/helpers");
+const { getDate, getRentalsResponse } = require("../helper/helpers");
 // get all regions by available properties
 exports.getAvailable = async (req, res) => {
   const devise = 3.1;
@@ -133,9 +133,103 @@ exports.getAvailable = async (req, res) => {
 };
 
 exports.getDetail = async (req, res) => {
-  const body = {};
+  const ID = req.params.id;
+
+  var body = {
+    Pull_ListSpecProp_RQ: {
+      Authentication: {
+        UserName: process.env.RENTALS_UNITED_LOGIN,
+        Password: process.env.RENTALS_UNITED_PASS,
+      },
+      PropertyID: ID,
+    },
+  };
   try {
-    return res.status(200).json({ formattedList });
+    var jsonResult = await getRentalsResponse(body, "Pull_ListSpecProp_RQ");
+
+    // data of detailed property
+    const mappedProperties = jsonResult.Pull_ListSpecProp_RS.Property.map(
+      (property) => ({
+        id: property.ID[0]["_"],
+        name: property.Name[0],
+        location_id: property.DetailedLocationID[0]["_"],
+        last_modified: property.LastMod[0]["_"],
+        date_created: property.DateCreated[0],
+        cleaning_price: property.CleaningPrice[0],
+        space: property.Space[0],
+        standard_guests: property.StandardGuests[0],
+        can_sleep_max: property.CanSleepMax[0],
+        type_property_id: property.PropertyTypeID[0],
+        objectType_id: property.ObjectTypeID[0],
+        // noOfUnits: property.NoOfUnits[0],
+        image: property.Images?.[0]?.Image?.map((image) => {
+          return {
+            url: image["_"],
+          };
+        }),
+        paiement: property.PaymentMethods?.[0]?.PaymentMethod?.map(
+          (paiement) => {
+            return {
+              payement_id: paiement["$"].PaymentMethodID,
+            };
+          }
+        ),
+        room: property.CompositionRoomsAmenities?.[0]?.CompositionRoomAmenities?.map(
+          (room) => {
+            return {
+              room_id: room["$"].CompositionRoomID,
+            };
+          }
+        ),
+        amenities: property.Amenities?.[0]?.Amenity?.map((amenity) => {
+          return {
+            amenity_id: amenity["_"],
+            count: amenity["$"].Count,
+          };
+        }),
+        floor: property.Floor[0],
+        street: property.Street[0],
+        zip_code: property.ZipCode[0],
+        coordinates: property.Coordinates[0],
+        check_in_out: property.CheckInOut[0],
+        deposit_id: property.Deposit[0]["$"].DepositTypeID,
+        deposit_value: property.Deposit[0]["_"],
+        preparation_time_before_arrival:
+          property.PreparationTimeBeforeArrival[0],
+        preparation_time_before_arrival_in_hours:
+          property.PreparationTimeBeforeArrivalInHours[0],
+        is_active: property.IsActive[0],
+        is_archived: property.IsArchived[0],
+        //terms_and_conditions_links: property.TermsAndConditionsLinks[0],
+        cancellation_policies:
+          property.CancellationPolicies[0].CancellationPolicy?.map(
+            (cancellationPolicy) => {
+              return {
+                value: cancellationPolicy["_"],
+                validFrom: cancellationPolicy["$"].ValidFrom,
+                validTo: cancellationPolicy["$"].ValidTo,
+              };
+            }
+          ),
+      })
+    );
+    var bodyAvailibility = {
+      Pull_ListPropertiesBlocks_RQ: {
+        Authentication: {
+          UserName: process.env.RENTALS_UNITED_LOGIN,
+          Password: process.env.RENTALS_UNITED_PASS,
+        },
+        LocationID: mappedProperties[0].location_id,
+        DateFrom: getDate(0, "years"),
+        DateTo: getDate(1, "years"),
+      },
+    };
+    var jsonResultPrice = await getRentalsResponse(
+      bodyAvailibility,
+      "Pull_ListPropertiesBlocks_RQ"
+    );
+
+    return res.status(200).json({ mappedProperties, jsonResultPrice });
   } catch (error) {
     return res.status(500).json({ message: error });
   }
