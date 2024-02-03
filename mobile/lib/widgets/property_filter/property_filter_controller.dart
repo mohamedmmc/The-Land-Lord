@@ -84,7 +84,7 @@ class PropertyFilterController extends GetxController {
   Widget _resolveCurrentStepMenu(double maxWidth) {
     switch (currentStep) {
       case PropertyFilterSteps.where:
-        List<DBObject> filteredLocations = List.of(MainAppServie.find.filterData!.locationList);
+        List<DBObject> filteredLocations = List.of(MainAppServie.find.filterData?.locationList ?? []);
         return GestureDetector(
           child: SizedBox(
             height: 300,
@@ -99,8 +99,8 @@ class PropertyFilterController extends GetxController {
                         hintText: 'Search Location',
                         fieldController: searchController,
                         onChanged: (value) {
-                          filteredLocations =
-                              List.of(MainAppServie.find.filterData!.locationList.where((element) => element.name.toLowerCase().contains(searchController.text.toLowerCase())).toList());
+                          filteredLocations = List.of(
+                              MainAppServie.find.filterData!.locationList.where((element) => element.name.toLowerCase().contains(searchController.text.toLowerCase())).toList());
                           setState(() {});
                         },
                       ),

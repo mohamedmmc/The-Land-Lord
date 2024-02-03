@@ -15,14 +15,12 @@ class FilterData {
 class DBObject {
   final int id;
   final String name;
-  final int count;
 
-  DBObject({required this.id, required this.name, required this.count});
+  DBObject({required this.id, required this.name});
 
   factory DBObject.fromJson(json) => DBObject(
         id: json['id'],
         name: json['name'],
-        count: json['count'],
       );
 }
 

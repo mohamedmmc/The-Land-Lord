@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:get/get.dart';
 
 import '../models/property.dart';
 import '../utils/constants/colors.dart';

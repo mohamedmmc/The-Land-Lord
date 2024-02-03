@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:the_land_lord_website/helpers/helper.dart';
+import 'package:the_land_lord_website/utils/constants/constants.dart';
 
 import '../models/filter_data.dart';
 import '../repository/location_repository.dart';
@@ -16,6 +17,7 @@ class MainAppServie extends GetxService {
 
   String getLocationNameById(int id) {
     try {
+      if ((laMarsaGrp['children'] as List).contains(id)) return laMarsaGrp['title'] as String;
       return filterData!.locationList.singleWhere((element) => element.id == id).name;
     } catch (e) {
       // TODO fix this
@@ -30,6 +32,7 @@ class MainAppServie extends GetxService {
 
   Future<void> _init() async {
     filterData = await LocationRepository.find.getAllLocation();
+    print('***************************** isReady *****************************');
     isReady = true;
     Helper.isLoading.value = false;
   }
