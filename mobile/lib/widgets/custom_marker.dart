@@ -21,39 +21,56 @@ class BuildCustomMarker extends StatefulWidget {
 }
 
 class _BuildCustomMarkerState extends State<BuildCustomMarker> {
+  OverlayEntry? _overlayEntry;
+
   Future<bool> openMarkerPopup(Property property, LayerLink markerLink, {bool close = false}) async {
     final bool = widget.mapController.move(property.coordinates!, 14);
     if (!close) {
       double width = 200;
       double height = 220;
-      Get.dialog(
-        barrierColor: Colors.transparent,
-        AlertDialog(
-          // actions: const [Icon(Icons.search)],
-          alignment: Alignment.centerRight,
-          backgroundColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent,
-          contentPadding: const EdgeInsets.all(100),
-          content: CompositedTransformFollower(
-            targetAnchor: Alignment.topLeft,
-            offset: Offset(-(width / 3.5) - 15, -height - 5),
-            link: markerLink,
-            child: Container(
-              padding: const EdgeInsets.all(Paddings.regular),
-              height: height,
-              decoration: BoxDecoration(borderRadius: regularRadius, color: kNeutralColor100),
-              child: Center(
-                child: PropertyCard(property: property, width: width, height: height),
-              ),
-            ),
-          ),
-        ),
-      );
-    } else if (Get.isDialogOpen ?? false) {
-      Get.back();
+      _overlayEntry = _createOverlayEntry(context, markerLink, property, width, height);
+      Overlay.of(context)?.insert(_overlayEntry!);
+    } else if (_overlayEntry?.mounted ?? false) {
+      _overlayEntry?.remove();
     }
     return bool;
   }
+
+  OverlayEntry _createOverlayEntry(BuildContext context, LayerLink markerLink, Property property, double width, double height) => OverlayEntry(
+        builder: (context) => Material(
+          color: Colors.transparent,
+          child: Stack(
+            children: [
+              Positioned.fill(
+                child: GestureDetector(
+                  onTap: () => _overlayEntry?.remove(),
+                ),
+              ),
+              Positioned(
+                top: 0,
+                right: 0,
+                child: CompositedTransformFollower(
+                  targetAnchor: Alignment.topLeft,
+                  offset: Offset(-(width / 3.5) - 15, -height - 5),
+                  link: markerLink,
+                  child: Material(
+                    elevation: 4.0,
+                    borderRadius: regularRadius,
+                    child: Container(
+                      padding: const EdgeInsets.all(Paddings.regular),
+                      height: height,
+                      decoration: BoxDecoration(borderRadius: regularRadius, color: kNeutralColor100),
+                      child: Center(
+                        child: PropertyCard(property: property, width: width, height: height),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
