@@ -21,7 +21,7 @@ exports.getAvailable = async (req, res) => {
   } = req.query;
   const language = languageQuery ? languageQuery : 1;
   const page = pageQuery ?? 1;
-  const listAmenities = amenities ? JSON.parse(amenities) : (amenities = null);
+  const listAmenities = amenities ? JSON.parse(amenities) : [];
   const limit = limitQuery ? parseInt(limitQuery) : 8;
   const offset = (page - 1) * limit;
   try {
@@ -85,9 +85,8 @@ exports.getAvailable = async (req, res) => {
         ${!priceMin ? "" : "AND property_price.price * :devise >= :priceMin"}
         ${!typeProperty ? "" : "AND property.type_property_id = :typeProperty"}
       GROUP BY property.id, property.name, location.id
-    
+      LIMIT :limit OFFSET :offset;
     `;
-    // LIMIT :limit OFFSET :offset;
     const locationList = await sequelize.query(query, {
       type: sequelize.QueryTypes.SELECT,
       replacements: {

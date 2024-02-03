@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:the_land_lord_website/repository/location_repository.dart';
 import 'package:the_land_lord_website/repository/property_repository.dart';
 import 'package:the_land_lord_website/views/properties/properties_screen.dart';
@@ -23,6 +24,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'The Land Lord',
       logWriterCallback: (text, {isError = false}) => isError ? LoggerService.logger?.e(text) : LoggerService.logger?.i(text),
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.stylus},
+      ),
       // localizationsDelegates: const <LocalizationsDelegate>[
       //   GlobalCupertinoLocalizations.delegate,
       //   GlobalMaterialLocalizations.delegate,

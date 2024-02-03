@@ -15,4 +15,3 @@ BorderRadius regularRadius = BorderRadius.circular(20);
 BorderRadius smallRadius = BorderRadius.circular(10);
 Border lightBorder = Border.all(color: kNeutralLightColor, width: 0.5);
 Border regularBorder = Border.all(color: kNeutralColor, width: 0.8);
-List<String> extraPropertyFilters = ['Piscine', 'Barbecue', 'Jacuzzi', 'Lit pour bébé', 'Cheminée', 'Logement fumeur'];

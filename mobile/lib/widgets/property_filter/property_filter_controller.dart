@@ -2,16 +2,16 @@ import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:the_land_lord_website/models/Location.dart';
-import 'package:the_land_lord_website/utils/constants/sizes.dart';
-import 'package:the_land_lord_website/widgets/custom_text_field.dart';
 
+import '../../models/filter_data.dart';
 import '../../services/main_app_service.dart';
 import '../../models/property_filter_model.dart';
+import '../../utils/constants/sizes.dart';
 import '../../utils/enums/booking_steps.dart';
 import '../../utils/constants/colors.dart';
 import '../../utils/constants/constants.dart';
 import '../../utils/enums/property_filter_steps.dart';
+import '../custom_text_field.dart';
 import '../flutter_counter.dart';
 import '../select_date_widget.dart';
 
@@ -84,48 +84,46 @@ class PropertyFilterController extends GetxController {
   Widget _resolveCurrentStepMenu(double maxWidth) {
     switch (currentStep) {
       case PropertyFilterSteps.where:
-        List<LocationData> filteredLocations = List.of(MainAppServie.find.locationList);
+        List<DBObject> filteredLocations = List.of(MainAppServie.find.filterData!.locationList);
         return GestureDetector(
           child: SizedBox(
             height: 300,
             width: 250,
             child: SingleChildScrollView(
               child: StatefulBuilder(
-                  builder: (context, setState) => Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: Paddings.regular).copyWith(bottom: Paddings.small),
-                            child: CustomTextField(
-                              hintText: 'Search Location',
-                              fieldController: searchController,
-                              onChanged: (value) {
-                                filteredLocations =
-                                    List.of(MainAppServie.find.locationList.where((element) => element.name.toLowerCase().contains(searchController.text.toLowerCase())).toList());
-                                setState(() {});
-                              },
-                            ),
-                          ),
-                          ...List.generate(
-                            filteredLocations.length + 1,
-                            (index) => ListTile(
-                              onTap: () {
-                                if (index == 0) {
-                                  currentSelection.location = null;
-                                } else {
-                                  currentSelection.location = filteredLocations[index - 1].id;
-                                }
-                                Get.back();
-                                searchController.clear();
-                                setCurrentStep(PropertyFilterSteps.checkin);
-                              },
-                              title: Text(index == 0 ? 'Anywhere' : filteredLocations[index - 1].name),
-                              trailing: Text(index == 0
-                                  ? '(${MainAppServie.find.propertyList.length} spots)'
-                                  : '(${MainAppServie.find.propertyList.where((element) => element.location == filteredLocations[index - 1].id).length} spots)'),
-                            ),
-                          ),
-                        ],
-                      )),
+                builder: (context, setState) => Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: Paddings.regular).copyWith(bottom: Paddings.small),
+                      child: CustomTextField(
+                        hintText: 'Search Location',
+                        fieldController: searchController,
+                        onChanged: (value) {
+                          filteredLocations =
+                              List.of(MainAppServie.find.filterData!.locationList.where((element) => element.name.toLowerCase().contains(searchController.text.toLowerCase())).toList());
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                    ...List.generate(
+                      filteredLocations.length + 1,
+                      (index) => ListTile(
+                        onTap: () {
+                          if (index == 0) {
+                            currentSelection.location = null;
+                          } else {
+                            currentSelection.location = filteredLocations[index - 1].id;
+                          }
+                          Get.back();
+                          searchController.clear();
+                          setCurrentStep(PropertyFilterSteps.checkin);
+                        },
+                        title: Text(index == 0 ? 'Anywhere' : filteredLocations[index - 1].name),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         );
