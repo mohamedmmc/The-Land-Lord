@@ -68465,4 +68465,11 @@ const listAmenities = [
   },
 ];
 
-module.exports = { constantId, listAmenities };
+const locationGroup = {
+  laMarsa: {
+    title: "La Marsa",
+    children: [63298, 25348, 63299],
+  },
+};
+
+module.exports = { constantId, listAmenities, locationGroup };

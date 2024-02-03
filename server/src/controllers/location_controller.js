@@ -1,17 +1,20 @@
 const { sequelize } = require("../../db.config");
-const { listAmenities } = require("../helper/constants");
+const { listAmenities, locationGroup } = require("../helper/constants");
 // get all regions by available properties
 exports.getByAvailableProperty = async (req, res) => {
   try {
     const queryLocation = `
-    SELECT location.id ,location.name, COUNT(location.name) as count FROM location
-    JOIN property on location.id = property.location_id
+    SELECT location.id, location.name
+    FROM location
+    JOIN property ON location.id = property.location_id
     WHERE property.is_active = 'true'
-    GROUP by location.name
+      AND location.id NOT IN (63298, 63299)
+    GROUP BY location.id, location.name;
   `;
     const locationList = await sequelize.query(queryLocation, {
       type: sequelize.QueryTypes.SELECT,
     });
+
     const queryPropertyType = `
     select type_property.id, type_property.name,  COUNT(type_property.name) as count 
     from property

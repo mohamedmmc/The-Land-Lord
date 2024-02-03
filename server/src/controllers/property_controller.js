@@ -1,5 +1,6 @@
 const { sequelize } = require("../../db.config");
 const { getDate, getRentalsResponse } = require("../helper/helpers");
+const { locationGroup } = require("../helper/constants");
 // get all regions by available properties
 exports.getAvailable = async (req, res) => {
   const devise = 3.1;
@@ -22,9 +23,14 @@ exports.getAvailable = async (req, res) => {
   const language = languageQuery ? languageQuery : 1;
   const page = pageQuery ?? 1;
   const listAmenities = amenities ? JSON.parse(amenities) : [];
-  const limit = limitQuery ? parseInt(limitQuery) : 8;
+  const limit = limitQuery ? parseInt(limitQuery) : 9;
   const offset = (page - 1) * limit;
+
   try {
+    const isGroupMarsa = locationGroup.laMarsa.children.includes(
+      parseInt(location)
+    );
+
     const query = `
       SELECT
         property.id,
@@ -78,14 +84,20 @@ exports.getAvailable = async (req, res) => {
             ? "AND description.house_rules LIKE :smokeAllowed"
             : ""
         }
-        ${!location ? "" : "AND property.location_id = :location"}
+        ${
+          !location
+            ? ""
+            : isGroupMarsa
+            ? "AND location.id IN (63298, 63299,25348)"
+            : "AND property.location_id = :location"
+        }
         ${!guest ? "" : "AND property.standard_guests = :guest"}
         ${!room ? "" : "AND property.can_sleep_max = :room"}
         ${!priceMax ? "" : "AND property_price.price * :devise <= :priceMax"}
         ${!priceMin ? "" : "AND property_price.price * :devise >= :priceMin"}
         ${!typeProperty ? "" : "AND property.type_property_id = :typeProperty"}
       GROUP BY property.id, property.name, location.id
-      LIMIT :limit OFFSET :offset;
+     
     `;
     const locationList = await sequelize.query(query, {
       type: sequelize.QueryTypes.SELECT,
