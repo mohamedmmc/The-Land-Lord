@@ -1,10 +1,7 @@
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
-import 'package:the_land_lord_website/views/properties/properties_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../utils/constants/colors.dart';
-import 'property_filter/property_filter_widget.dart';
 
 class CustomAppBar extends StatelessWidget {
   const CustomAppBar({super.key});

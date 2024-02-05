@@ -10,5 +10,4 @@ Color kNeutralLightColor = Colors.grey[400]!;
 const Color kBlackColor = Colors.black;
 const Color kNeutralColor100 = Colors.white;
 const Color kConfirmedColor = Color(0xFF34A853);
-const Color kQuranBgColor = Color(0xFFFFF8E1);
 const Color kSelectedColor = Color(0xff008BF9);

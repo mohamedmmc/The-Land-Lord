@@ -32,7 +32,6 @@ class MainAppServie extends GetxService {
 
   Future<void> _init() async {
     filterData = await LocationRepository.find.getAllLocation();
-    print('***************************** isReady *****************************');
     isReady = true;
     Helper.isLoading.value = false;
   }
