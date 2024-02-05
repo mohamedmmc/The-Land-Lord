@@ -228,18 +228,29 @@ async function getDetailedProperties(propertyList) {
   };
 }
 
-function getDate(num, unit) {
-  const newDate = new Date();
-
-  if (unit === "months") {
-    newDate.setMonth(newDate.getMonth() + num);
-  } else if (unit === "years") {
-    newDate.setFullYear(newDate.getFullYear() + num);
-  } else {
-    throw new Error('Invalid unit. Use "months" or "years".');
+function getDate(num, unit, operator = "+", dateString = "") {
+  if (dateString) {
+    if (!/\d{4}-\d{2}-\d{2}/.test(dateString)) {
+      throw new Error('Invalid date format. Use "YYYY-MM-DD".');
+    }
   }
 
-  const formattedDate = newDate.toISOString().slice(0, 10);
+  // Handle operator validation and calculation as before:
+
+  // Use today's date if no dateString is provided:
+  const date = dateString ? new Date(dateString) : new Date();
+
+  if (unit === "days") {
+    date.setDate(date.getDate() + (operator === "+" ? num : -num));
+  } else if (unit === "months") {
+    date.setMonth(date.getMonth() + (operator === "+" ? num : -num));
+  } else if (unit === "years") {
+    date.setFullYear(date.getFullYear() + (operator === "+" ? num : -num));
+  } else {
+    throw new Error('Invalid unit. Use "days", "months", or "years".');
+  }
+
+  const formattedDate = date.toISOString().slice(0, 10);
   return formattedDate;
 }
 

@@ -260,7 +260,7 @@ exports.getDetail = async (req, res) => {
         property.Block.map((block) => ({
           block: {
             date_from: block.DateFrom[0],
-            date_to: block.DateTo[0],
+            date_to: getDate(1, "days", "-", block.DateTo[0]),
           },
         }))
       );
