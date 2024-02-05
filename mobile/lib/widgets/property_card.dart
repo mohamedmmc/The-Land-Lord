@@ -1,16 +1,11 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:the_land_lord_website/helpers/helper.dart';
-import 'package:the_land_lord_website/views/property_detail/properties_screen.dart';
 
 import '../models/property.dart';
 import '../services/main_app_service.dart';
 import '../utils/constants/colors.dart';
 import '../utils/constants/constants.dart';
 import '../utils/constants/sizes.dart';
-import '../utils/shared_preferences.dart';
 import '../utils/theme/theme.dart';
 import 'custom_buttons.dart';
 import 'overflowed_text_with_tooltip.dart';

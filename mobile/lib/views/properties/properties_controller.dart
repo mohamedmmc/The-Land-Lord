@@ -11,7 +11,7 @@ import '../../models/property.dart';
 import '../../models/property_filter_model.dart';
 import '../../repository/property_repository.dart';
 import '../../utils/shared_preferences.dart';
-import '../property_detail/properties_screen.dart';
+import '../property_detail/property_detail_screen.dart';
 
 class PropertiesController extends GetxController {
   PropertyFilterModel? _filter;
@@ -130,7 +130,7 @@ class PropertiesController extends GetxController {
   }
 
   void detailScreen(String id) {
-    SharedPreferencesService.find.add('idProperty', id ?? '');
+    SharedPreferencesService.find.add('idProperty', id);
     Get.toNamed(PropertyDetailScreen.routeName, arguments: {'id': id});
   }
 

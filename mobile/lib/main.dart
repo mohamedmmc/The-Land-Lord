@@ -1,9 +1,8 @@
 import 'package:flutter/gestures.dart';
-import 'package:http/http.dart';
 import 'package:the_land_lord_website/repository/location_repository.dart';
 import 'package:the_land_lord_website/repository/property_repository.dart';
 import 'package:the_land_lord_website/views/properties/properties_screen.dart';
-import 'package:the_land_lord_website/views/property_detail/properties_screen.dart';
+import 'package:the_land_lord_website/views/property_detail/property_detail_screen.dart';
 import 'package:the_land_lord_website/views/property_detail/property_detail_controller.dart';
 import 'package:the_land_lord_website/widgets/property_filter/property_filter_controller.dart';
 import 'package:flutter/material.dart';
