@@ -19,6 +19,7 @@ exports.getAvailable = async (req, res) => {
     smokeAllowed,
     typeProperty,
     amenities,
+    wcCount,
   } = req.query;
   const language = languageQuery ? languageQuery : 1;
   const page = pageQuery ?? 1;
@@ -36,6 +37,7 @@ exports.getAvailable = async (req, res) => {
         property.id,
         property.name AS name,
         property.cleaning_price,
+        (SELECT COUNT(*) FROM property_room WHERE room_id = 81 and property.id = property_room.property_id) AS wc_count,
         SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT property_image.url ORDER BY property_image.id ASC SEPARATOR ','), ',', 3) AS image_urls,
         description.house_rules,
         description.text,
@@ -92,12 +94,20 @@ exports.getAvailable = async (req, res) => {
             : "AND property.location_id = :location"
         }
         ${!guest ? "" : "AND property.standard_guests = :guest"}
-        ${!room ? "" : "AND property.can_sleep_max = :room"}
+        ${
+          !room
+            ? ""
+            : room == 5
+            ? "AND property.can_sleep_max => :room"
+            : "AND property.can_sleep_max = :room"
+        }
         ${!priceMax ? "" : "AND property_price.price * :devise <= :priceMax"}
         ${!priceMin ? "" : "AND property_price.price * :devise >= :priceMin"}
+        
         ${!typeProperty ? "" : "AND property.type_property_id = :typeProperty"}
       GROUP BY property.id, property.name, location.id
-     
+      ${!wcCount ? "" : "HAVING wc_count = :wcCount"}
+     LIMIT :limit OFFSET :offset
     `;
     const locationList = await sequelize.query(query, {
       type: sequelize.QueryTypes.SELECT,
@@ -115,6 +125,7 @@ exports.getAvailable = async (req, res) => {
         petAllowed: `%Pets - ${petAllowed}%`,
         smokeAllowed: `%Smoking - ${smokeAllowed}%`,
         devise: devise,
+        wcCount: wcCount ? parseInt(wcCount) : null,
       },
     });
 
@@ -137,6 +148,7 @@ exports.getAvailable = async (req, res) => {
         description: row.text,
         beds: row.can_sleep_max,
         guests: row.standard_guests,
+        wcCount: row.wc_count,
       }));
     return res.status(200).json({ formattedList });
   } catch (error) {
