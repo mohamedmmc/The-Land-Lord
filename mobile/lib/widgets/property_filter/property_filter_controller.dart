@@ -20,7 +20,7 @@ class PropertyFilterController extends GetxController {
   final LayerLink layerLink = LayerLink();
   PropertyFilterSteps _currentStep = PropertyFilterSteps.where;
   List<String> guestInfoList = ['Adults', 'Children', 'Infants', 'Pets'];
-  bool _isOverlayOpen = false;
+  bool _isDropdownOpen = false;
   bool _isExpanded = false;
 
   bool get isExpanded => _isExpanded;
@@ -30,16 +30,21 @@ class PropertyFilterController extends GetxController {
     update();
   }
 
+  set isDropdownOpen(bool value) {
+    _isDropdownOpen = value;
+    update();
+  }
+
   PropertyFilterController() {
     _init();
   }
 
   PropertyFilterModel currentSelection = PropertyFilterModel();
 
-  bool get isOverlayOpen => _isOverlayOpen;
+  bool get isDropdownOpen => _isDropdownOpen;
 
   PropertyFilterModel toggleOverlay() {
-    _isOverlayOpen = !_isOverlayOpen;
+    _isDropdownOpen = !_isDropdownOpen;
     update();
     return currentSelection;
   }
@@ -50,7 +55,8 @@ class PropertyFilterController extends GetxController {
     // The user needs to set the checkin before the checkout
     if (value == PropertyFilterSteps.checkout && currentSelection.checkin == null) value = PropertyFilterSteps.checkin;
     _currentStep = value;
-    toggleOverlay();
+    if (!_isDropdownOpen) toggleOverlay();
+    update();
   }
 
   Widget filterOverlayWidget({required double maxWidth}) {
@@ -131,7 +137,7 @@ class PropertyFilterController extends GetxController {
       case PropertyFilterSteps.checkout:
         return SizedBox(
           height: 400,
-          width: maxWidth - 320,
+          width: maxWidth - 270,
           child: SelectDateWidget(
             initialSelectedRange: PickerDateRange(currentSelection.checkin, currentSelection.checkout),
             step: BookingStep.selectDate,
@@ -151,7 +157,7 @@ class PropertyFilterController extends GetxController {
       case PropertyFilterSteps.guest:
         return SizedBox(
           height: 300,
-          width: 200,
+          width: 230,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: List.generate(
@@ -197,14 +203,16 @@ class PropertyFilterController extends GetxController {
     if (isMobile) {
       // Get.toNamed(BookingDetailsScreen.routeName);
     } else {
-      isExpanded = !isExpanded;
+      _isDropdownOpen = !isDropdownOpen;
       final filter = toggleOverlay();
       if (!isExpanded) updateFilter.call(filter);
       update();
     }
   }
 
-  void _init() {}
+  void _init() {
+    isExpanded = GetPlatform.isWeb || GetPlatform.isDesktop || GetPlatform.isMacOS;
+  }
 
   int _resolveInitialValue(int index) {
     switch (index) {

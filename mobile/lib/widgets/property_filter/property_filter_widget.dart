@@ -2,6 +2,8 @@ import 'package:the_land_lord_website/models/property_filter_model.dart';
 import 'package:the_land_lord_website/services/main_app_service.dart';
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
 import 'package:the_land_lord_website/widgets/custom_buttons.dart';
+import 'package:the_land_lord_website/widgets/on_hover.dart';
+import 'package:the_land_lord_website/widgets/property_filter/components/more_filters_popup.dart';
 import 'package:the_land_lord_website/widgets/property_filter/property_filter_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -12,15 +14,17 @@ import '../../utils/enums/property_filter_steps.dart';
 
 class PropertyFilterWidget extends StatelessWidget {
   final Widget propertiesList;
-  final Widget? additionalFilters;
   final void Function()? closeOverlay;
   final BoxConstraints constraints;
   final void Function(PropertyFilterModel) updateFilter;
+  final bool? toggleExpandFilter;
+  final ScrollController scrollController;
 
   const PropertyFilterWidget({
     super.key,
     required this.propertiesList,
-    this.additionalFilters,
+    required this.scrollController,
+    this.toggleExpandFilter,
     this.closeOverlay,
     required this.constraints,
     required this.updateFilter,
@@ -31,28 +35,30 @@ class PropertyFilterWidget extends StatelessWidget {
     bool isMobile = GetPlatform.isAndroid || GetPlatform.isIOS || GetPlatform.isMobile;
     final textTheme = Theme.of(context).textTheme;
     return GetBuilder<PropertyFilterController>(
+      didUpdateWidget: (oldWidget, state) => state.controller?.isExpanded = !(toggleExpandFilter ?? false),
       builder: (controller) => SizedBox(
         width: constraints.maxWidth,
         child: Stack(
           children: [
-            if (controller.isExpanded) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile, updateFilter))),
+            if (controller.isDropdownOpen) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile, updateFilter))),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: controller.isExpanded ? constraints.maxWidth - 200 : constraints.maxWidth - 100, minWidth: 300),
-                    child: GestureDetector(
-                      onTap: () => controller.manageFilter(isMobile, updateFilter),
-                      child: Hero(
-                        tag: 'search',
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: controller.isExpanded ? constraints.maxWidth - 150 : constraints.maxWidth - 100, minWidth: 300),
+                      child: GestureDetector(
+                        onTap: () => controller.manageFilter(isMobile, updateFilter),
                         child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: controller.isExpanded ? 60 : 200),
+                          margin: EdgeInsets.symmetric(horizontal: controller.isExpanded ? 60 : 150),
                           padding: controller.isExpanded ? null : const EdgeInsets.symmetric(horizontal: Paddings.large, vertical: Paddings.regular),
                           height: controller.isExpanded ? 80 : 61,
                           width: constraints.maxWidth,
                           decoration: BoxDecoration(
-                            color: controller.isExpanded ? kNeutralLightColor : kNeutralColor100,
-                            border: Border.all(color: kNeutralLightColor, width: 0.5),
+                            color: kNeutralColor100,
+                            border: lightBorder,
                             borderRadius: circularRadius,
                             // boxShadow: [
                             //   BoxShadow(
@@ -71,47 +77,80 @@ class PropertyFilterWidget extends StatelessWidget {
                                       PropertyFilterSteps.values.length,
                                       (index) {
                                         final step = PropertyFilterSteps.values[index];
-                                        return controller.currentStep == step
+                                        return controller.currentStep == step && controller.isDropdownOpen
                                             ? Expanded(
                                                 flex: 3,
                                                 child: DecoratedBox(
-                                                  decoration: BoxDecoration(color: kNeutralColor100, borderRadius: circularRadius),
-                                                  child: Center(
-                                                    child: ListTile(
-                                                      contentPadding: const EdgeInsets.symmetric(horizontal: Paddings.extraLarge),
-                                                      title: Text(step.value),
-                                                      titleTextStyle: textTheme.bodyMedium!
-                                                          .copyWith(fontWeight: FontWeight.bold, color: controller.isExpanded ? kBlackColor : kNeutralColor100),
-                                                      subtitle: controller.resolveStepSubtitle(step),
-                                                      subtitleTextStyle: textTheme.bodySmall!.copyWith(color: controller.isExpanded ? kBlackColor : kNeutralColor100),
-                                                    ),
+                                                  decoration: BoxDecoration(color: kNeutralLightColor, borderRadius: circularRadius),
+                                                  child: Row(
+                                                    children: [
+                                                      Expanded(
+                                                        flex: 2,
+                                                        child: Center(
+                                                          child: ListTile(
+                                                            contentPadding: const EdgeInsets.only(left: Paddings.exceptional),
+                                                            title: Text(step.value),
+                                                            titleTextStyle: textTheme.bodyMedium!
+                                                                .copyWith(fontWeight: FontWeight.bold, color: controller.isExpanded ? kBlackColor : kNeutralColor100),
+                                                            subtitle: controller.resolveStepSubtitle(step),
+                                                            subtitleTextStyle: textTheme.bodySmall!.copyWith(color: controller.isExpanded ? kBlackColor : kNeutralColor100),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      if (index == PropertyFilterSteps.values.length - 1)
+                                                        Expanded(
+                                                          child: CustomButtons.icon(
+                                                            onPressed: () => controller.toggleOverlay(),
+                                                            child: Icon(Icons.search, color: controller.isDropdownOpen ? kNeutralColor100 : kBlackColor),
+                                                          ),
+                                                        ),
+                                                    ],
                                                   ),
                                                 ),
                                               )
                                             : Expanded(
-                                                flex: 2,
-                                                child: InkWell(
-                                                  onTap: () => controller.setCurrentStep(step),
-                                                  child: Center(
-                                                    child: ListTile(
-                                                      contentPadding: const EdgeInsets.symmetric(horizontal: Paddings.extraLarge),
-                                                      title: Text(step.value),
-                                                      titleTextStyle: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
-                                                      subtitle: controller.resolveStepSubtitle(step),
-                                                      subtitleTextStyle: textTheme.bodySmall!,
+                                                flex: index == 0 || index == PropertyFilterSteps.values.length - 1 ? 3 : 2,
+                                                child: OnHover(
+                                                  builder: (isHovered) => DecoratedBox(
+                                                    decoration: BoxDecoration(
+                                                      color: isHovered
+                                                          ? kNeutralLightColor.withAlpha(150)
+                                                          : controller.currentStep == step && controller.isDropdownOpen
+                                                              ? kNeutralLightColor
+                                                              : kNeutralColor100,
+                                                      borderRadius: circularRadius,
+                                                    ),
+                                                    child: Row(
+                                                      children: [
+                                                        Expanded(
+                                                          flex: 2,
+                                                          child: InkWell(
+                                                            onTap: () => controller.setCurrentStep(step),
+                                                            child: Center(
+                                                              child: ListTile(
+                                                                contentPadding: const EdgeInsets.only(left: Paddings.exceptional),
+                                                                title: Text(step.value),
+                                                                titleTextStyle: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
+                                                                subtitle: controller.resolveStepSubtitle(step),
+                                                                subtitleTextStyle: textTheme.bodySmall!.copyWith(color: kNeutralColor),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        if (index == PropertyFilterSteps.values.length - 1)
+                                                          Expanded(
+                                                            child: CustomButtons.icon(
+                                                              onPressed: () => controller.toggleOverlay(),
+                                                              child: const Icon(Icons.search, color: kBlackColor),
+                                                            ),
+                                                          ),
+                                                      ],
                                                     ),
                                                   ),
                                                 ),
                                               );
                                       },
-                                    ).followedBy([
-                                      Expanded(
-                                        child: CustomButtons.icon(
-                                          onPressed: () => controller.isExpanded = !controller.isExpanded,
-                                          child: const Icon(Icons.search, color: kNeutralColor100),
-                                        ),
-                                      ),
-                                    ]).toList(),
+                                    ),
                                   ),
                                 )
                               : Row(
@@ -133,15 +172,49 @@ class PropertyFilterWidget extends StatelessWidget {
                         ),
                       ),
                     ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: Paddings.exceptional),
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(border: lightBorder, borderRadius: circularRadius, color: kNeutralColor100),
+                        child: CustomButtons.icon(
+                          padding: const EdgeInsets.all(Paddings.large),
+                          icon: const Icon(Icons.tune_outlined),
+                          onPressed: () => Get.bottomSheet(MoreFiltersPopup(maxWidth: constraints.maxWidth), isScrollControlled: true),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                const SizedBox(height: Paddings.large),
+                Expanded(
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: Paddings.exceptional * 1.5, vertical: Paddings.regular),
+                          child: Text(
+                            "Découvrez notre sélection pour vos vacances",
+                            style: TextStyle(
+                              fontSize: 26.0,
+                              height: 1.5,
+                              color: Color.fromRGBO(33, 45, 82, 1),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        propertiesList,
+                      ],
+                    ),
                   ),
                 ),
-                if (additionalFilters != null) additionalFilters!,
-                propertiesList,
               ],
             ),
-            Positioned(
-              child: controller.filterOverlayWidget(maxWidth: constraints.maxWidth),
-            ),
+            if (controller.isDropdownOpen)
+              Positioned(
+                child: controller.filterOverlayWidget(maxWidth: constraints.maxWidth),
+              ),
           ],
         ),
       ),

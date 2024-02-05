@@ -14,13 +14,25 @@ import '../../repository/property_repository.dart';
 class PropertiesController extends GetxController {
   PropertyFilterModel? _filter;
   final ScrollController scrollController = ScrollController();
+  final TextEditingController minPriceController = TextEditingController();
+  final TextEditingController maxPriceController = TextEditingController();
   List<Property> filteredProperties = [];
   List<LayerLink> propertiesMarkerLayer = [];
   MapController mapController = MapController();
   bool isEndList = false;
+  bool _isFilterExpanded = false;
   int page = 0;
+  double priceSliderMin = 20;
+  double priceSliderMax = 2200;
 
   PropertyFilterModel? get filter => _filter;
+  bool get isFilterExpanded => _isFilterExpanded;
+
+  set isFilterExpanded(bool value) {
+    if (value == _isFilterExpanded) return;
+    _isFilterExpanded = value;
+    update();
+  }
 
   set filter(PropertyFilterModel? filterModel) {
     _filter = filterModel;
@@ -30,7 +42,10 @@ class PropertiesController extends GetxController {
 
   PropertiesController() {
     _filter = PropertyFilterModel();
+    minPriceController.text = priceSliderMin.toStringAsFixed(1);
+    maxPriceController.text = priceSliderMax.toStringAsFixed(1);
     scrollController.addListener(() {
+      isFilterExpanded = scrollController.position.pixels >= 50;
       if (scrollController.position.pixels >= scrollController.position.maxScrollExtent) _loadMore();
     });
     Helper.waitAndExecute(() => !Helper.isLoading.value, () => _getProperties());
@@ -134,5 +149,27 @@ class PropertiesController extends GetxController {
     propertiesMarkerLayer = [for (int i = 0; i < filteredProperties.length; i++) LayerLink()];
     update();
     return properties.length;
+  }
+
+  void managePriceFilter({RangeValues? range, String? min, String? max}) {
+    if (range != null) {
+      priceSliderMin = range.start;
+      priceSliderMax = range.end;
+    }
+    if (min != null) {
+      final minDouble = double.parse(min);
+      if (minDouble < priceSliderMax) {
+        priceSliderMin = minDouble;
+      }
+    }
+    if (max != null) {
+      final maxDouble = double.parse(max);
+      if (maxDouble > priceSliderMin) {
+        priceSliderMax = maxDouble;
+      }
+    }
+    minPriceController.text = priceSliderMin.toStringAsFixed(1);
+    maxPriceController.text = priceSliderMax.toStringAsFixed(1);
+    update();
   }
 }

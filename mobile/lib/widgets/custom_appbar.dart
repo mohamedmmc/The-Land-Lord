@@ -1,10 +1,7 @@
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
-import 'package:the_land_lord_website/views/properties/properties_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../utils/constants/colors.dart';
-import 'property_filter/property_filter_widget.dart';
 
 class CustomAppBar extends StatelessWidget {
   const CustomAppBar({super.key});
@@ -27,14 +24,6 @@ class CustomAppBar extends StatelessWidget {
                 const Text('Services'),
                 const Text('A Propos'),
                 const Text('Contact'),
-                if (Get.currentRoute == PropertiesScreen.routeName)
-                  const SizedBox(width: 300)
-                else
-                  PropertyFilterWidget(
-                    propertiesList: SizedBox(height: Get.height),
-                    constraints: const BoxConstraints(maxHeight: 60, maxWidth: 300),
-                    updateFilter: (filter) {},
-                  ),
                 const CircleAvatar(radius: 18, backgroundColor: kPrimaryColor, child: Text('GU')),
                 const SizedBox(),
               ],

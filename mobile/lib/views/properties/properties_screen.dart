@@ -1,22 +1,20 @@
-import 'package:the_land_lord_website/models/property_filter_model.dart';
-import 'package:the_land_lord_website/services/main_app_service.dart';
-import 'package:the_land_lord_website/utils/constants/sizes.dart';
-import 'package:the_land_lord_website/utils/theme/theme.dart';
-import 'package:the_land_lord_website/widgets/property_card.dart';
-import 'package:the_land_lord_website/views/properties/properties_controller.dart';
-import 'package:the_land_lord_website/widgets/property_filter/property_filter_widget.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart' as lottie;
 
 import '../../helpers/helper.dart';
+import '../../models/property_filter_model.dart';
 import '../../utils/constants/assets.dart';
 import '../../utils/constants/colors.dart';
 import '../../utils/constants/constants.dart';
+import '../../utils/constants/sizes.dart';
+import '../../utils/theme/theme.dart';
 import '../../widgets/custom_appbar.dart';
-import '../../widgets/custom_dropdown.dart';
 import '../../widgets/custom_marker.dart';
+import '../../widgets/property_card.dart';
+import '../../widgets/property_filter/property_filter_widget.dart';
+import 'properties_controller.dart';
 
 class PropertiesScreen extends StatelessWidget {
   final PropertyFilterModel? filter;
@@ -50,26 +48,15 @@ class PropertiesScreen extends StatelessWidget {
                         Flexible(
                           flex: 5,
                           child: LayoutBuilder(
-                            builder: (_, constraints) => SingleChildScrollView(
-                              controller: controller.scrollController,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  const SizedBox(height: 15.0),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: Paddings.exceptional).copyWith(bottom: Paddings.extraLarge),
-                                    child: const Text(
-                                      "Découvrez notre sélection pour vos vacances",
-                                      style: TextStyle(
-                                        fontSize: 26.0,
-                                        height: 1.5,
-                                        color: Color.fromRGBO(33, 45, 82, 1),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                  PropertyFilterWidget(
+                            builder: (_, constraints) => Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: Paddings.large),
+                                Expanded(
+                                  child: PropertyFilterWidget(
+                                    scrollController: controller.scrollController,
+                                    toggleExpandFilter: controller.isFilterExpanded,
                                     updateFilter: (filter) {
                                       if (filter.location == null && controller.filter?.location != null) controller.filter?.location = null;
                                       controller.updateFilter(filterModel: filter);
@@ -107,128 +94,9 @@ class PropertiesScreen extends StatelessWidget {
                                               ],
                                             ),
                                     ),
-                                    additionalFilters: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: Paddings.exceptional * 2.5),
-                                      child: Column(
-                                        children: [
-                                          ConstrainedBox(
-                                            constraints: const BoxConstraints(maxHeight: 71),
-                                            child: SizedBox(
-                                              height: 71,
-                                              child: Row(
-                                                children: [
-                                                  Expanded(
-                                                    child: CustomDropDownMenu(
-                                                      buttonHeight: 50,
-                                                      maxWidth: true,
-                                                      hint: controller.filter?.rooms != null ? '${controller.filter?.rooms} Chambres' : 'Chambres',
-                                                      items: [
-                                                        'Clear',
-                                                        ...[1, 2, 3, 4, 5].map((e) => e == 5 ? '5+' : e.toString())
-                                                      ],
-                                                      selectedItem: controller.filter?.rooms,
-                                                      onChanged: (value) {
-                                                        if (value == 'Clear') {
-                                                          controller.filter?.rooms = null;
-                                                          controller.updateFilter();
-                                                        } else {
-                                                          if (value.toString().contains('+')) value = value.toString().substring(0, 1);
-                                                          controller.updateFilter(rooms: int.parse(value.toString()));
-                                                        }
-                                                      },
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 15),
-                                                  Expanded(
-                                                    child: CustomDropDownMenu(
-                                                      maxWidth: true,
-                                                      buttonHeight: 50,
-                                                      hint: controller.filter?.beds != null ? '${controller.filter?.beds} Lits' : 'Lits',
-                                                      items: [
-                                                        'Clear',
-                                                        ...[1, 2, 3, 4, 5].map((e) => e == 5 ? '5+' : e.toString())
-                                                      ],
-                                                      selectedItem: controller.filter?.beds,
-                                                      onChanged: (value) {
-                                                        if (value == 'Clear') {
-                                                          controller.filter?.beds = null;
-                                                          controller.updateFilter();
-                                                        } else {
-                                                          if (value.toString().contains('+')) value = value.toString().substring(0, 1);
-                                                          controller.updateFilter(beds: int.parse(value.toString()));
-                                                        }
-                                                      },
-                                                    ),
-                                                  ),
-                                                  const SizedBox(width: 15),
-                                                  Expanded(
-                                                    child: CustomDropDownMenu(
-                                                      maxWidth: true,
-                                                      buttonHeight: 50,
-                                                      hint: controller.filter?.type != null ? MainAppServie.find.getTypeNameById(controller.filter!.type!) : 'Type',
-                                                      selectedItem: controller.filter?.type != null ? MainAppServie.find.getTypeNameById(controller.filter!.type!) : null,
-                                                      items: ['Clear', ...MainAppServie.find.filterData?.propertyTypelist.map((e) => e.name).toList() ?? []],
-                                                      onChanged: (value) {
-                                                        if (value == 'Clear') {
-                                                          controller.filter?.type = null;
-                                                          controller.updateFilter();
-                                                        } else {
-                                                          controller.updateFilter(type: MainAppServie.find.getTypeIdByName(value.toString()));
-                                                        }
-                                                      },
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: Paddings.large),
-                                            child: SizedBox(
-                                              width: constraints.maxWidth - 150,
-                                              child: DecoratedBox(
-                                                decoration: BoxDecoration(color: kNeutralColor100, borderRadius: smallRadius, border: lightBorder),
-                                                child: Theme(
-                                                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                                                  child: ExpansionTile(
-                                                    title: const Text('More extra filters'),
-                                                    children: [
-                                                      Padding(
-                                                        padding: const EdgeInsets.symmetric(vertical: Paddings.regular),
-                                                        child: Wrap(
-                                                          runSpacing: 15,
-                                                          spacing: 10,
-                                                          children: List.generate(
-                                                            MainAppServie.find.filterData?.listAmenities.length ?? 0,
-                                                            (index) {
-                                                              var amenity = MainAppServie.find.filterData!.listAmenities[index];
-                                                              return SizedBox(
-                                                                height: 40,
-                                                                width: 250,
-                                                                child: ListTile(
-                                                                  title: Text(amenity.name),
-                                                                  leading: Checkbox(
-                                                                    onChanged: (value) => controller.updateFilter(amenity: {'amenity': amenity, 'value': value}),
-                                                                    value: controller.filter?.amenities.any((element) => element.id == amenity.id) ?? false,
-                                                                  ),
-                                                                ),
-                                                              );
-                                                            },
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
