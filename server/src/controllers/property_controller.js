@@ -253,7 +253,19 @@ exports.getDetail = async (req, res) => {
       "Pull_ListPropertiesBlocks_RQ"
     );
 
-    return res.status(200).json({ mappedProperties, jsonResultPrice });
+    const mappedCalendar =
+      jsonResultPrice.Pull_ListPropertiesBlocks_RS.Properties[0].PropertyBlock.filter(
+        (row) => Number(row["$"].PropertyID) === Number(ID)
+      ).flatMap((property) =>
+        property.Block.map((block) => ({
+          block: {
+            date_from: block.DateFrom[0],
+            date_to: block.DateTo[0],
+          },
+        }))
+      );
+
+    return res.status(200).json({ mappedCalendar, mappedProperties });
   } catch (error) {
     return res.status(500).json({ message: error });
   }
