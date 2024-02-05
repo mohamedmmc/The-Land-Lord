@@ -10,6 +10,8 @@ import '../../helpers/helper.dart';
 import '../../models/property.dart';
 import '../../models/property_filter_model.dart';
 import '../../repository/property_repository.dart';
+import '../../utils/shared_preferences.dart';
+import '../property_detail/properties_screen.dart';
 
 class PropertiesController extends GetxController {
   PropertyFilterModel? _filter;
@@ -110,6 +112,11 @@ class PropertiesController extends GetxController {
     Helper.blockRequest.value = true;
     isEndList = (await _getProperties()) == 0;
     Future.delayed(Durations.long1, () => Helper.blockRequest.value = false);
+  }
+
+  void detailScreen(String id) {
+    SharedPreferencesService.find.add('idProperty', id ?? '');
+    Get.toNamed(PropertyDetailScreen.routeName, arguments: {'id': id});
   }
 
   Future<int> _getProperties() async {

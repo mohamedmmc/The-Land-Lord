@@ -101,6 +101,9 @@ class PropertiesScreen extends StatelessWidget {
                                                         property: controller.filteredProperties[index],
                                                         filtred: controller.filter?.checkin != null,
                                                         key: Key(controller.filteredProperties[index].id.toString()),
+                                                        onTap: (){
+                                                          controller.detailScreen(controller.filteredProperties[index].id ?? '');
+                                                        },
                                                       )
                                                   ],
                                                 ),

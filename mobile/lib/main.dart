@@ -1,7 +1,10 @@
 import 'package:flutter/gestures.dart';
+import 'package:http/http.dart';
 import 'package:the_land_lord_website/repository/location_repository.dart';
 import 'package:the_land_lord_website/repository/property_repository.dart';
 import 'package:the_land_lord_website/views/properties/properties_screen.dart';
+import 'package:the_land_lord_website/views/property_detail/properties_screen.dart';
+import 'package:the_land_lord_website/views/property_detail/property_detail_controller.dart';
 import 'package:the_land_lord_website/widgets/property_filter/property_filter_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -46,6 +49,12 @@ class MyApp extends StatelessWidget {
           page: () => const PropertiesScreen(),
           binding: BindingsBuilder.put(() => PropertiesController()),
         ),
+        GetPage(
+          name: PropertyDetailScreen.routeName,
+          page: () => const PropertyDetailScreen(),
+          binding: BindingsBuilder.put(() => PropertyDetailController()),
+
+        ),
         // GetPage(
         //   name: BookingDetailsScreen.routeName,
         //   page: () => const BookingDetailsScreen(),
@@ -71,7 +80,7 @@ class MyApp extends StatelessWidget {
 class InitialBindings implements Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<SharedPreferencesService>(() => SharedPreferencesService());
+    Get.put(SharedPreferencesService(), permanent: true);
     Get.put(LoggerService(), permanent: true);
     Get.put(LocationRepository(), permanent: true);
     Get.put(PropertyRepository(), permanent: true);

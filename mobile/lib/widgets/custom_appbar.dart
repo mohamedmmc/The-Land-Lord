@@ -27,14 +27,6 @@ class CustomAppBar extends StatelessWidget {
                 const Text('Services'),
                 const Text('A Propos'),
                 const Text('Contact'),
-                if (Get.currentRoute == PropertiesScreen.routeName)
-                  const SizedBox(width: 300)
-                else
-                  PropertyFilterWidget(
-                    propertiesList: SizedBox(height: Get.height),
-                    constraints: const BoxConstraints(maxHeight: 60, maxWidth: 300),
-                    updateFilter: (filter) {},
-                  ),
                 const CircleAvatar(radius: 18, backgroundColor: kPrimaryColor, child: Text('GU')),
                 const SizedBox(),
               ],

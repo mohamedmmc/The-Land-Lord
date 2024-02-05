@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 
 import '../models/property.dart';
 import '../utils/constants/colors.dart';
 import '../utils/constants/constants.dart';
 import '../utils/constants/sizes.dart';
+import '../utils/shared_preferences.dart';
 import '../utils/theme/theme.dart';
+import '../views/property_detail/properties_screen.dart';
 import 'property_card.dart';
 
 class BuildCustomMarker extends StatefulWidget {
@@ -60,7 +64,16 @@ class _BuildCustomMarkerState extends State<BuildCustomMarker> {
                       height: height,
                       decoration: BoxDecoration(borderRadius: regularRadius, color: kNeutralColor100),
                       child: Center(
-                        child: PropertyCard(property: property, width: width, height: height),
+                        child: PropertyCard(
+                          property: property,
+                          width: width,
+                          height: height,
+                          onTap: () {
+                            _overlayEntry?.remove();
+                            SharedPreferencesService.find.add('idProperty', property.id ?? '');
+                            Get.toNamed(PropertyDetailScreen.routeName, arguments: {'id': property.id});
+                          },
+                        ),
                       ),
                     ),
                   ),
