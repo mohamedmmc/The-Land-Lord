@@ -47,21 +47,18 @@ class PropertiesController extends GetxController {
     Helper.waitAndExecute(() => !Helper.isLoading.value, () => _getProperties());
   }
 
-  void updateFilter({PropertyFilterModel? filterModel}) {
-    if (filterModel?.amenities.isEmpty ?? false) _filter?.amenities.clear();
-    filter = PropertyFilterModel(
-      location: filterModel?.location ?? filter?.location,
-      beds: filterModel?.beds ?? filter?.beds,
-      checkin: filterModel?.checkin ?? filter?.checkin,
-      checkout: filterModel?.checkout ?? filter?.checkout,
-      bathrooms: filterModel?.bathrooms ?? filter?.bathrooms,
-      type: filterModel?.type ?? filter?.type,
-      guest: filterModel?.guest ?? filter?.guest,
-      amenitiesList: filterModel?.amenities != null && filterModel!.amenities.isNotEmpty ? filterModel.amenities : filter?.amenities,
-      priceMin: filterModel?.priceMin ?? filter?.priceMin,
-      priceMax: filterModel?.priceMax ?? filter?.priceMax,
-    );
-  }
+  void updateFilter({PropertyFilterModel? filterModel}) => filter = PropertyFilterModel(
+        location: filterModel?.location ?? filter?.location,
+        checkin: filterModel?.checkin ?? filter?.checkin,
+        checkout: filterModel?.checkout ?? filter?.checkout,
+        guest: filterModel?.guest ?? filter?.guest,
+        beds: filterModel?.beds,
+        bathrooms: filterModel?.bathrooms,
+        type: filterModel?.type,
+        amenitiesList: filterModel?.amenities,
+        priceMin: filterModel?.priceMin,
+        priceMax: filterModel?.priceMax,
+      );
 
   Map<String, dynamic>? calculateMidPoint() {
     Map<String, dynamic> calculateMidpoint(List<LatLng> coordinates) {

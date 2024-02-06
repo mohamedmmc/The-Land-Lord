@@ -159,7 +159,10 @@ class MoreFiltersPopup extends StatelessWidget {
                                 isWrap: true,
                                 list: ['Any', ...MainAppServie.find.filterData?.propertyTypelist.map((e) => e.name).toList() ?? []],
                                 selected: controller.filter?.type != null ? MainAppServie.find.getTypeNameById(controller.filter!.type!) : 'Any',
-                                onSelect: (value) => controller.updateFilterModel(type: value == 'Any' ? null : MainAppServie.find.getTypeIdByName(value.toString())),
+                                onSelect: (value) {
+                                  if (value == 'Any') controller.filter?.type = null;
+                                  controller.updateFilterModel(type: value == 'Any' ? null : MainAppServie.find.getTypeIdByName(value.toString()));
+                                },
                               ),
                               const SizedBox(height: Paddings.large),
                               Divider(color: kNeutralLightColor.withAlpha(150)),

@@ -50,7 +50,7 @@ class MyApp extends StatelessWidget {
         ),
         GetPage(
           name: PropertyDetailScreen.routeName,
-          page: () =>  PropertyDetailScreen(),
+          page: () =>  const PropertyDetailScreen(),
           binding: BindingsBuilder.put(() => PropertyDetailController()),
 
         ),

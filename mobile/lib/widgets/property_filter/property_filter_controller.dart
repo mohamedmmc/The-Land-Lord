@@ -277,8 +277,12 @@ class PropertyFilterController extends GetxController {
           return Padding(
             padding: const EdgeInsets.only(right: Paddings.regular),
             child: CustomButtons.icon(
-              onPressed: () {
+              onPressed: () async {
                 _filter?.checkin = null;
+                _filter?.checkout = null;
+                toggleOverlay();
+                await Future.delayed(const Duration(milliseconds: 100));
+                setCurrentStep(PropertyFilterSteps.checkin);
                 update();
               },
               icon: const Icon(Icons.clear, size: 14),

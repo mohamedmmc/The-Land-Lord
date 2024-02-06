@@ -44,7 +44,6 @@ class PropertyFilterWidget extends StatelessWidget {
         width: constraints.maxWidth,
         child: Stack(
           children: [
-            if (controller.isDropdownOpen) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile))),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -147,7 +146,7 @@ class PropertyFilterWidget extends StatelessWidget {
                                                         if (index == PropertyFilterSteps.values.length - 1)
                                                           Expanded(
                                                             child: CustomButtons.icon(
-                                                              onPressed: () => controller.toggleOverlay(),
+                                                              onPressed: () => controller.manageFilter(isMobile),
                                                               child: const Icon(Icons.search, color: kBlackColor),
                                                             ),
                                                           ),
@@ -227,10 +226,8 @@ class PropertyFilterWidget extends StatelessWidget {
                 ),
               ],
             ),
-            if (controller.isDropdownOpen)
-              Positioned(
-                child: controller.filterOverlayWidget(maxWidth: constraints.maxWidth),
-              ),
+            if (controller.isDropdownOpen) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile))),
+            if (controller.isDropdownOpen) Positioned(child: controller.filterOverlayWidget(maxWidth: constraints.maxWidth)),
           ],
         ),
       ),
