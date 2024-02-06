@@ -2,6 +2,8 @@ import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:the_land_lord_website/models/guest.dart';
+import 'package:the_land_lord_website/widgets/custom_buttons.dart';
 
 import '../../models/filter_data.dart';
 import '../../services/main_app_service.dart';
@@ -16,17 +18,37 @@ import '../flutter_counter.dart';
 import '../select_date_widget.dart';
 
 class PropertyFilterController extends GetxController {
+  void Function(PropertyFilterModel)? updateFilter;
   final TextEditingController searchController = TextEditingController();
+  final TextEditingController minPriceController = TextEditingController();
+  final TextEditingController maxPriceController = TextEditingController();
   final LayerLink layerLink = LayerLink();
   PropertyFilterSteps _currentStep = PropertyFilterSteps.where;
   List<String> guestInfoList = ['Adults', 'Children', 'Infants', 'Pets'];
   bool _isDropdownOpen = false;
   bool _isExpanded = false;
+  PropertyFilterModel? _filter;
+  bool _isLoading = false;
 
+  bool get isLoading => _isLoading;
+  PropertyFilterModel? get filter => _filter;
   bool get isExpanded => _isExpanded;
+  bool get isDropdownOpen => _isDropdownOpen;
+  PropertyFilterSteps get currentStep => _currentStep;
+
+  set isLoading(bool value) {
+    _isLoading = value;
+    update();
+  }
+
+  set filter(PropertyFilterModel? filterModel) {
+    _filter = filterModel;
+    update();
+  }
 
   set isExpanded(bool value) {
     _isExpanded = value;
+    if (!_isExpanded) _isDropdownOpen = false;
     update();
   }
 
@@ -39,21 +61,15 @@ class PropertyFilterController extends GetxController {
     _init();
   }
 
-  PropertyFilterModel currentSelection = PropertyFilterModel();
-
-  bool get isDropdownOpen => _isDropdownOpen;
-
   PropertyFilterModel toggleOverlay() {
     _isDropdownOpen = !_isDropdownOpen;
     update();
-    return currentSelection;
+    return _filter!;
   }
-
-  PropertyFilterSteps get currentStep => _currentStep;
 
   void setCurrentStep(PropertyFilterSteps value) {
     // The user needs to set the checkin before the checkout
-    if (value == PropertyFilterSteps.checkout && currentSelection.checkin == null) value = PropertyFilterSteps.checkin;
+    if (value == PropertyFilterSteps.checkout && _filter?.checkin == null) value = PropertyFilterSteps.checkin;
     _currentStep = value;
     if (!_isDropdownOpen) toggleOverlay();
     update();
@@ -65,7 +81,7 @@ class PropertyFilterController extends GetxController {
       link: layerLink,
       showWhenUnlinked: false,
       targetAnchor: currentStep == PropertyFilterSteps.guest ? Alignment.centerRight : Alignment.centerLeft,
-      offset: currentStep == PropertyFilterSteps.guest ? const Offset(-230, 50) : const Offset(0, 50),
+      offset: currentStep == PropertyFilterSteps.guest ? const Offset(-230, 40) : const Offset(0, 40),
       child: Material(
         color: kNeutralColor100,
         borderRadius: regularRadius,
@@ -77,13 +93,13 @@ class PropertyFilterController extends GetxController {
   Text resolveStepSubtitle(PropertyFilterSteps step) {
     switch (step) {
       case PropertyFilterSteps.where:
-        return Text(currentSelection.location != null ? MainAppServie.find.getLocationNameById(currentSelection.location!) : 'Any Where');
+        return Text(_filter?.location != null ? MainAppServie.find.getLocationNameById(_filter!.location!) : 'Any Where');
       case PropertyFilterSteps.checkin:
-        return Text(currentSelection.checkin != null ? DateFormat.yMd().format(currentSelection.checkin!) : 'Any Time');
+        return Text(_filter?.checkin != null ? DateFormat.yMd().format(_filter!.checkin!) : 'Any Time');
       case PropertyFilterSteps.checkout:
-        return Text(currentSelection.checkout != null ? DateFormat.yMd().format(currentSelection.checkout!) : 'Any Time');
+        return Text(_filter?.checkout != null ? DateFormat.yMd().format(_filter!.checkout!) : 'Any Time');
       case PropertyFilterSteps.guest:
-        return Text(currentSelection.guest.total);
+        return Text(_filter!.guest.total);
     }
   }
 
@@ -116,9 +132,9 @@ class PropertyFilterController extends GetxController {
                       (index) => ListTile(
                         onTap: () {
                           if (index == 0) {
-                            currentSelection.location = null;
+                            _filter?.location = null;
                           } else {
-                            currentSelection.location = filteredLocations[index - 1].id;
+                            _filter?.location = filteredLocations[index - 1].id;
                           }
                           Get.back();
                           searchController.clear();
@@ -139,14 +155,14 @@ class PropertyFilterController extends GetxController {
           height: 400,
           width: maxWidth - 270,
           child: SelectDateWidget(
-            initialSelectedRange: PickerDateRange(currentSelection.checkin, currentSelection.checkout),
+            initialSelectedRange: PickerDateRange(_filter?.checkin, _filter?.checkout),
             step: BookingStep.selectDate,
             onSelectionChanged: (selection) async {
               if (currentStep == PropertyFilterSteps.checkin) {
-                currentSelection.checkin = selection.value.startDate;
+                _filter?.checkin = selection.value.startDate;
                 setCurrentStep(PropertyFilterSteps.checkout);
               } else {
-                currentSelection.checkout = selection.value.endDate;
+                _filter?.checkout = selection.value.endDate;
                 await Future.delayed(const Duration(milliseconds: 400));
                 Get.back();
                 setCurrentStep(PropertyFilterSteps.guest);
@@ -176,16 +192,16 @@ class PropertyFilterController extends GetxController {
                   onChanged: (value) {
                     switch (index) {
                       case 0:
-                        currentSelection.guest.adults = value.toInt();
+                        _filter?.guest.adults = value.toInt();
                         break;
                       case 1:
-                        currentSelection.guest.children = value.toInt();
+                        _filter?.guest.children = value.toInt();
                         break;
                       case 2:
-                        currentSelection.guest.infants = value.toInt();
+                        _filter?.guest.infants = value.toInt();
                         break;
                       case 3:
-                        currentSelection.guest.pets = value.toInt();
+                        _filter?.guest.pets = value.toInt();
                         break;
                       default:
                     }
@@ -199,33 +215,144 @@ class PropertyFilterController extends GetxController {
     }
   }
 
-  void manageFilter(bool isMobile, void Function(PropertyFilterModel filter) updateFilter) {
+  void manageFilter(bool isMobile) {
     if (isMobile) {
       // Get.toNamed(BookingDetailsScreen.routeName);
     } else {
-      _isDropdownOpen = !isDropdownOpen;
       final filter = toggleOverlay();
-      if (!isExpanded) updateFilter.call(filter);
+      if (isDropdownOpen && !isExpanded) _isExpanded = true;
+      if (!isDropdownOpen) updateFilter?.call(filter);
       update();
     }
   }
 
+  void managePriceFilter({RangeValues? range, String? min, String? max}) {
+    if (range != null) {
+      filter?.priceMin = range.start;
+      filter?.priceMax = range.end;
+    }
+    if (min != null) {
+      final minDouble = double.parse(min);
+      if (minDouble < filter!.priceMax) filter?.priceMin = minDouble;
+    }
+    if (max != null) {
+      final maxDouble = double.parse(max);
+      if (maxDouble > filter!.priceMin) filter?.priceMax = maxDouble;
+    }
+    minPriceController.text = filter!.priceMin.toStringAsFixed(1);
+    maxPriceController.text = filter!.priceMax.toStringAsFixed(1);
+    update();
+  }
+
+  void resetFilterForm() {
+    filter = PropertyFilterModel();
+    managePriceFilter(max: maxPriceRange.toString(), min: minPriceRange.toString());
+  }
+
   void _init() {
+    filter ??= PropertyFilterModel();
+    minPriceController.text = filter!.priceMin.toStringAsFixed(1);
+    maxPriceController.text = filter!.priceMax.toStringAsFixed(1);
     isExpanded = GetPlatform.isWeb || GetPlatform.isDesktop || GetPlatform.isMacOS;
+  }
+
+  Widget? resolveClearFilterTrailing(PropertyFilterSteps step) {
+    switch (currentStep) {
+      case PropertyFilterSteps.where:
+        if (_filter?.location != null) {
+          return Padding(
+            padding: const EdgeInsets.only(right: Paddings.regular),
+            child: CustomButtons.icon(
+              onPressed: () {
+                _filter?.location = null;
+                update();
+              },
+              icon: const Icon(Icons.clear, size: 14),
+            ),
+          );
+        }
+        break;
+      case PropertyFilterSteps.checkin:
+        if (_filter?.checkin != null) {
+          return Padding(
+            padding: const EdgeInsets.only(right: Paddings.regular),
+            child: CustomButtons.icon(
+              onPressed: () {
+                _filter?.checkin = null;
+                update();
+              },
+              icon: const Icon(Icons.clear, size: 14),
+            ),
+          );
+        }
+        break;
+      case PropertyFilterSteps.checkout:
+        if (_filter?.checkout != null) {
+          return Padding(
+            padding: const EdgeInsets.only(right: Paddings.regular),
+            child: CustomButtons.icon(
+              onPressed: () {
+                _filter?.checkout = null;
+                update();
+              },
+              icon: const Icon(Icons.clear, size: 14),
+            ),
+          );
+        }
+        break;
+      case PropertyFilterSteps.guest:
+        if (_filter!.guest.totalGuests > 1 || _filter!.guest.pets > 0) {
+          return CustomButtons.icon(
+            onPressed: () {
+              _filter?.guest = Guest();
+              update();
+            },
+            icon: const Icon(Icons.clear, size: 14),
+          );
+        }
+        break;
+    }
+    return null;
   }
 
   int _resolveInitialValue(int index) {
     switch (index) {
       case 0:
-        return currentSelection.guest.adults;
+        return _filter!.guest.adults;
       case 1:
-        return currentSelection.guest.children;
+        return _filter!.guest.children;
       case 2:
-        return currentSelection.guest.infants;
+        return _filter!.guest.infants;
       case 3:
-        return currentSelection.guest.pets;
+        return _filter!.guest.pets;
       default:
         return 0;
     }
+  }
+
+  void updateFilterModel({int? bathrooms, int? beds, int? type, PropertyFilterModel? filterModel, Map<String, dynamic>? amenity, bool clearAll = false}) {
+    if (clearAll) {
+      filter = PropertyFilterModel();
+      return;
+    }
+    if (amenity != null) {
+      if (amenity['value']) {
+        filter?.amenities.add(amenity['amenity']);
+      } else {
+        filter?.amenities.remove(amenity['amenity']);
+      }
+    }
+    filter = PropertyFilterModel(
+      location: filterModel?.location ?? filter?.location,
+      beds: beds ?? filterModel?.beds ?? filter?.beds,
+      checkin: filterModel?.checkin ?? filter?.checkin,
+      checkout: filterModel?.checkout ?? filter?.checkout,
+      bathrooms: bathrooms ?? filterModel?.bathrooms ?? filter?.bathrooms,
+      type: type ?? filterModel?.type ?? filter?.type,
+      guest: filterModel?.guest ?? filter?.guest,
+      amenitiesList: filter?.amenities,
+      priceMin: filterModel?.priceMin ?? filter?.priceMin,
+      priceMax: filterModel?.priceMax ?? filter?.priceMax,
+    );
   }
 }

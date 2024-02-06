@@ -1,3 +1,5 @@
+import 'package:lottie/lottie.dart';
+import 'package:the_land_lord_website/helpers/helper.dart';
 import 'package:the_land_lord_website/models/property_filter_model.dart';
 import 'package:the_land_lord_website/services/main_app_service.dart';
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
@@ -8,6 +10,7 @@ import 'package:the_land_lord_website/widgets/property_filter/property_filter_co
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../utils/constants/assets.dart';
 import '../../utils/constants/colors.dart';
 import '../../utils/constants/constants.dart';
 import '../../utils/enums/property_filter_steps.dart';
@@ -35,12 +38,13 @@ class PropertyFilterWidget extends StatelessWidget {
     bool isMobile = GetPlatform.isAndroid || GetPlatform.isIOS || GetPlatform.isMobile;
     final textTheme = Theme.of(context).textTheme;
     return GetBuilder<PropertyFilterController>(
-      didUpdateWidget: (oldWidget, state) => state.controller?.isExpanded = !(toggleExpandFilter ?? false),
+      didChangeDependencies: (state) => state.controller?.updateFilter ??= updateFilter,
+      didUpdateWidget: (oldWidget, state) => WidgetsBinding.instance.addPostFrameCallback((timeStamp) => state.controller?.isExpanded = !(toggleExpandFilter ?? false)),
       builder: (controller) => SizedBox(
         width: constraints.maxWidth,
         child: Stack(
           children: [
-            if (controller.isDropdownOpen) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile, updateFilter))),
+            if (controller.isDropdownOpen) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile))),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -50,11 +54,11 @@ class PropertyFilterWidget extends StatelessWidget {
                     ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: controller.isExpanded ? constraints.maxWidth - 150 : constraints.maxWidth - 100, minWidth: 300),
                       child: GestureDetector(
-                        onTap: () => controller.manageFilter(isMobile, updateFilter),
+                        onTap: () => controller.manageFilter(isMobile),
                         child: Container(
                           margin: EdgeInsets.symmetric(horizontal: controller.isExpanded ? 60 : 150),
                           padding: controller.isExpanded ? null : const EdgeInsets.symmetric(horizontal: Paddings.large, vertical: Paddings.regular),
-                          height: controller.isExpanded ? 80 : 61,
+                          height: controller.isExpanded ? 65 : 61,
                           width: constraints.maxWidth,
                           decoration: BoxDecoration(
                             color: kNeutralColor100,
@@ -85,7 +89,7 @@ class PropertyFilterWidget extends StatelessWidget {
                                                   child: Row(
                                                     children: [
                                                       Expanded(
-                                                        flex: 2,
+                                                        flex: 4,
                                                         child: Center(
                                                           child: ListTile(
                                                             contentPadding: const EdgeInsets.only(left: Paddings.exceptional),
@@ -94,13 +98,16 @@ class PropertyFilterWidget extends StatelessWidget {
                                                                 .copyWith(fontWeight: FontWeight.bold, color: controller.isExpanded ? kBlackColor : kNeutralColor100),
                                                             subtitle: controller.resolveStepSubtitle(step),
                                                             subtitleTextStyle: textTheme.bodySmall!.copyWith(color: controller.isExpanded ? kBlackColor : kNeutralColor100),
+                                                            trailing: controller.resolveClearFilterTrailing(step),
                                                           ),
                                                         ),
                                                       ),
                                                       if (index == PropertyFilterSteps.values.length - 1)
-                                                        Expanded(
+                                                        Padding(
+                                                          padding: const EdgeInsets.only(right: Paddings.regular),
                                                           child: CustomButtons.icon(
-                                                            onPressed: () => controller.toggleOverlay(),
+                                                            padding: const EdgeInsets.all(Paddings.small),
+                                                            onPressed: () => controller.manageFilter(isMobile),
                                                             child: Icon(Icons.search, color: controller.isDropdownOpen ? kNeutralColor100 : kBlackColor),
                                                           ),
                                                         ),
@@ -162,7 +169,7 @@ class PropertyFilterWidget extends StatelessWidget {
                                       children: [
                                         Text('Where to?', style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold)),
                                         Text(
-                                          '${controller.currentSelection.location != null ? MainAppServie.find.getLocationNameById(controller.currentSelection.location!) : 'Anywhere'} • ${controller.currentSelection.getDuration ?? 'Any week'} • ${controller.currentSelection.guest.total}',
+                                          '${controller.filter?.location != null ? MainAppServie.find.getLocationNameById(controller.filter!.location!) : 'Anywhere'} • ${controller.filter?.getDuration ?? 'Any week'} • ${controller.filter?.guest.total}',
                                           style: textTheme.bodyMedium,
                                         ),
                                       ],
@@ -188,6 +195,7 @@ class PropertyFilterWidget extends StatelessWidget {
                 const SizedBox(height: Paddings.large),
                 Expanded(
                   child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(right: Paddings.regular),
                     controller: scrollController,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,6 +213,14 @@ class PropertyFilterWidget extends StatelessWidget {
                           ),
                         ),
                         propertiesList,
+                        Obx(
+                          () => Helper.isLoading.value
+                              ? Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: Paddings.large, horizontal: Paddings.exceptional * 1.5),
+                                  child: Center(child: Lottie.asset(Assets.fetchingData, height: 100)),
+                                )
+                              : const SizedBox(),
+                        ),
                       ],
                     ),
                   ),

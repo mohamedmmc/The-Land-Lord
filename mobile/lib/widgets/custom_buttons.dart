@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:the_land_lord_website/utils/theme/theme.dart';
 
 import '../utils/constants/colors.dart';
 import '../utils/constants/sizes.dart';
@@ -132,7 +133,7 @@ class CustomButtons extends StatelessWidget {
                 borderRadius: BorderRadius.all(Radius.circular(5)),
               ),
             ),
-            padding: MaterialStateProperty.all(padding ?? EdgeInsets.zero),
+            padding: MaterialStateProperty.all(padding ?? const EdgeInsets.symmetric(horizontal: Paddings.regular)),
             minimumSize: MaterialStateProperty.all(
               Size(
                 width ?? 50,
@@ -143,7 +144,7 @@ class CustomButtons extends StatelessWidget {
                 ? MaterialStateProperty.all(buttonColor)
                 : disabled
                     ? MaterialStateProperty.all(Theme.of(context).scaffoldBackgroundColor)
-                    : MaterialStateProperty.all(Theme.of(context).primaryColor),
+                    : MaterialStateProperty.all(kPrimaryColor),
           ),
           onPressed: disabled || loading
               ? null
@@ -161,18 +162,16 @@ class CustomButtons extends StatelessWidget {
                   Text(
                     title ?? '',
                     textAlign: TextAlign.center,
-                    style: titleStyle ?? Theme.of(context).textTheme.displaySmall,
+                    style: titleStyle ?? AppFonts.x16Bold,
                   ),
         );
       case ButtonType.elevateSecondary:
         return ElevatedButton(
           style: ButtonStyle(
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              RoundedRectangleBorder(
-                borderRadius: const BorderRadius.all(Radius.circular(5)),
-                side: BorderSide(
-                  color: Theme.of(context).primaryColor,
-                ),
+              const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(5)),
+                side: BorderSide(color: kPrimaryColor),
               ),
             ),
             padding: MaterialStateProperty.all(padding ?? EdgeInsets.zero),
@@ -191,9 +190,7 @@ class CustomButtons extends StatelessWidget {
                   onPressed();
                 },
           child: loading
-              ? CircularProgressIndicator(
-                  color: Theme.of(context).primaryColor,
-                )
+              ? const CircularProgressIndicator(color: kPrimaryColor)
               : icon != null
                   ? Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -232,9 +229,7 @@ class CustomButtons extends StatelessWidget {
           child: child ??
               Text(
                 title ?? '',
-                style: disabled
-                    ? Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: titleStyle?.fontSize ?? 17)
-                    : titleStyle ?? Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: 17),
+                style: disabled ? Theme.of(context).textTheme.titleLarge?.copyWith(fontSize: titleStyle?.fontSize ?? 17) : titleStyle ?? AppFonts.x16Regular,
               ),
         );
       case ButtonType.icon:
@@ -261,7 +256,7 @@ class CustomButtons extends StatelessWidget {
             shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(RadiusSize.regular))),
             elevation: 0,
             padding: padding ?? const EdgeInsets.all(Paddings.regular),
-            backgroundColor: disabled ? Theme.of(context).scaffoldBackgroundColor : buttonColor ?? Theme.of(context).primaryColor,
+            backgroundColor: disabled ? Theme.of(context).scaffoldBackgroundColor : buttonColor ?? kPrimaryColor,
           ),
           child: child ?? icon,
         );
