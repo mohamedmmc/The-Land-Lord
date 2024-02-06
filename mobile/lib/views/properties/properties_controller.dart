@@ -16,16 +16,12 @@ import '../property_detail/property_detail_screen.dart';
 class PropertiesController extends GetxController {
   PropertyFilterModel? _filter;
   final ScrollController scrollController = ScrollController();
-  final TextEditingController minPriceController = TextEditingController();
-  final TextEditingController maxPriceController = TextEditingController();
   List<Property> filteredProperties = [];
   List<LayerLink> propertiesMarkerLayer = [];
   MapController mapController = MapController();
   bool isEndList = false;
   bool _isFilterExpanded = false;
   int page = 0;
-  double priceSliderMin = 20;
-  double priceSliderMax = 2200;
 
   PropertyFilterModel? get filter => _filter;
   bool get isFilterExpanded => _isFilterExpanded;
@@ -44,32 +40,26 @@ class PropertiesController extends GetxController {
 
   PropertiesController() {
     _filter = PropertyFilterModel();
-    minPriceController.text = priceSliderMin.toStringAsFixed(1);
-    maxPriceController.text = priceSliderMax.toStringAsFixed(1);
     scrollController.addListener(() {
       isFilterExpanded = scrollController.position.pixels >= 50;
-      if (scrollController.position.pixels >= scrollController.position.maxScrollExtent) _loadMore();
+      if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 50) _loadMore();
     });
     Helper.waitAndExecute(() => !Helper.isLoading.value, () => _getProperties());
   }
 
-  void updateFilter({int? rooms, int? beds, int? type, PropertyFilterModel? filterModel, Map<String, dynamic>? amenity}) {
-    if (amenity != null) {
-      if (amenity['value']) {
-        filter?.amenities.add(amenity['amenity']);
-      } else {
-        filter?.amenities.remove(amenity['amenity']);
-      }
-    }
+  void updateFilter({PropertyFilterModel? filterModel}) {
+    if (filterModel?.amenities.isEmpty ?? false) _filter?.amenities.clear();
     filter = PropertyFilterModel(
       location: filterModel?.location ?? filter?.location,
-      beds: beds ?? filterModel?.beds ?? filter?.beds,
+      beds: filterModel?.beds ?? filter?.beds,
       checkin: filterModel?.checkin ?? filter?.checkin,
       checkout: filterModel?.checkout ?? filter?.checkout,
-      rooms: rooms ?? filterModel?.rooms ?? filter?.rooms,
-      type: type ?? filterModel?.type ?? filter?.type,
+      bathrooms: filterModel?.bathrooms ?? filter?.bathrooms,
+      type: filterModel?.type ?? filter?.type,
       guest: filterModel?.guest ?? filter?.guest,
-      amenitiesList: filter?.amenities,
+      amenitiesList: filterModel?.amenities != null && filterModel!.amenities.isNotEmpty ? filterModel.amenities : filter?.amenities,
+      priceMin: filterModel?.priceMin ?? filter?.priceMin,
+      priceMax: filterModel?.priceMax ?? filter?.priceMax,
     );
   }
 
@@ -125,7 +115,10 @@ class PropertiesController extends GetxController {
   Future<void> _loadMore() async {
     if (isEndList || Helper.blockRequest.value) return;
     Helper.blockRequest.value = true;
+    Helper.isLoading.value = true;
+    await scrollController.animateTo(scrollController.position.maxScrollExtent + 50, duration: Durations.medium1, curve: Curves.bounceIn);
     isEndList = (await _getProperties()) == 0;
+    Helper.isLoading.value = false;
     Future.delayed(Durations.long1, () => Helper.blockRequest.value = false);
   }
 
@@ -143,8 +136,11 @@ class PropertiesController extends GetxController {
       guest: filter?.guest.totalGuests == 1 ? null : filter?.guest.totalGuests,
       locationId: filter?.location,
       petAllowed: filter!.guest.pets > 0 ? true : null,
-      room: filter?.rooms,
+      bathrooms: filter?.bathrooms,
       type: filter?.type,
+      beds: filter?.beds,
+      priceMax: filter?.priceMax,
+      priceMin: filter?.priceMin,
       amenities: filter?.amenities.map((e) => int.parse(e.id)).toList(),
     );
     if (properties.isEmpty) isEndList = true;
@@ -156,27 +152,5 @@ class PropertiesController extends GetxController {
     propertiesMarkerLayer = [for (int i = 0; i < filteredProperties.length; i++) LayerLink()];
     update();
     return properties.length;
-  }
-
-  void managePriceFilter({RangeValues? range, String? min, String? max}) {
-    if (range != null) {
-      priceSliderMin = range.start;
-      priceSliderMax = range.end;
-    }
-    if (min != null) {
-      final minDouble = double.parse(min);
-      if (minDouble < priceSliderMax) {
-        priceSliderMin = minDouble;
-      }
-    }
-    if (max != null) {
-      final maxDouble = double.parse(max);
-      if (maxDouble > priceSliderMin) {
-        priceSliderMax = maxDouble;
-      }
-    }
-    minPriceController.text = priceSliderMin.toStringAsFixed(1);
-    maxPriceController.text = priceSliderMax.toStringAsFixed(1);
-    update();
   }
 }

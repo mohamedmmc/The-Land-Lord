@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:the_land_lord_website/utils/constants/constants.dart';
+import 'package:the_land_lord_website/widgets/on_hover.dart';
 
 import '../utils/constants/colors.dart';
 import '../utils/constants/sizes.dart';
@@ -62,7 +63,7 @@ class CustomDropDownMenu<T> extends StatelessWidget {
     this.isDisabled = false,
     this.labelIncluded = false,
     this.labelAlongside = false,
-    this.dropDownWithDecoration = true,
+    this.dropDownWithDecoration = false,
     this.addWidthFallBack = true,
     this.buttonWidth,
     this.buttonHeight = 35,
@@ -305,13 +306,19 @@ class _BuildDropDownButton<T> extends StatelessWidget {
                               .map<DropdownMenuItem<T>>(
                                 (value) => DropdownMenuItem<T>(
                                   value: value,
-                                  child: DecoratedBox(
-                                    decoration: BoxDecoration(
-                                      color: selectedItem != null && selectedItem == value ? kPrimaryColor : null,
-                                      borderRadius: smallRadius,
-                                    ),
-                                    child: Center(
-                                      child: Text(valueFrom?.call(value) ?? value.toString(), style: AppFonts.x14Bold),
+                                  child: OnHover(
+                                    builder: (isHovered) => DecoratedBox(
+                                      decoration: BoxDecoration(
+                                        color: isHovered
+                                            ? kNeutralLightColor.withAlpha(150)
+                                            : selectedItem != null && selectedItem == value
+                                                ? kPrimaryColor
+                                                : null,
+                                        borderRadius: smallRadius,
+                                      ),
+                                      child: Center(
+                                        child: Text(valueFrom?.call(value) ?? value.toString(), style: AppFonts.x14Bold),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -376,7 +383,7 @@ class _BuildDropDownButton<T> extends StatelessWidget {
                             : null,
                         overlayColor: overlayColor != null ? MaterialStatePropertyAll(overlayColor) : null,
                       ),
-                      menuItemStyleData: MenuItemStyleData(height: itemHeight!, padding: itemPadding),
+                      menuItemStyleData: MenuItemStyleData(height: itemHeight!, padding: itemPadding ?? const EdgeInsets.all(Paddings.small)),
                       onMenuStateChange: (isOpen) {
                         isMenuOpen?.call(isOpen);
                         if (!isOpen) searchController.clear();

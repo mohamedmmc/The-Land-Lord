@@ -2,6 +2,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart' as lottie;
+import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 
 import '../../helpers/helper.dart';
 import '../../models/property_filter_model.dart';
@@ -28,8 +29,8 @@ class PropertiesScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: kNeutralColor100,
         surfaceTintColor: kNeutralColor100,
-        toolbarHeight: 110,
-        flexibleSpace: const CustomAppBar(),
+        toolbarHeight: 80,
+        flexibleSpace: const Center(child: CustomAppBar()),
       ),
       // TODO Use for mobile device
       // bottomNavigationBar: AppBottomNavigation(),
@@ -117,7 +118,10 @@ class PropertiesScreen extends StatelessWidget {
                                 },
                               ),
                               children: [
-                                TileLayer(urlTemplate: 'https://basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png'),
+                                TileLayer(
+                                  urlTemplate: 'https://basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png',
+                                  tileProvider: CancellableNetworkTileProvider(),
+                                ),
                                 MarkerLayer(
                                   markers: List.generate(
                                     controller.filteredProperties.where((element) => element.coordinates != null).length,

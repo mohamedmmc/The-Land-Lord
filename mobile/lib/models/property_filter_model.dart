@@ -1,16 +1,19 @@
 import 'package:intl/intl.dart';
 import 'package:the_land_lord_website/models/filter_data.dart';
 
+import '../utils/constants/constants.dart';
 import 'guest.dart';
 
 class PropertyFilterModel {
   int? location;
   DateTime? checkin;
   DateTime? checkout;
-  final Guest guest;
-  int? rooms;
+  Guest guest;
+  int? bathrooms;
   int? beds;
   int? type;
+  double priceMin;
+  double priceMax;
   List<Amenity> amenities;
 
   String? get getDuration {
@@ -23,7 +26,9 @@ class PropertyFilterModel {
     }
   }
 
-  PropertyFilterModel({this.location, this.checkin, this.checkout, this.beds, this.rooms, this.type, Guest? guest, List<Amenity>? amenitiesList})
+  PropertyFilterModel({this.location, this.checkin, this.checkout, this.beds, this.bathrooms, this.type, Guest? guest, List<Amenity>? amenitiesList, double? priceMin = 20, double? priceMax = 2200})
       : guest = guest ?? Guest(),
+        priceMin = priceMin ?? minPriceRange,
+        priceMax = priceMax ?? maxPriceRange,
         amenities = amenitiesList ?? [];
 }
