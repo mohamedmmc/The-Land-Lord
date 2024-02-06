@@ -50,7 +50,7 @@ class Property {
     guests = int.tryParse(json['guests']);
     beds = json['beds'] != null ? int.tryParse(json['beds']) : null;
     rooms = json['rooms'] != null ? int.tryParse(json['rooms']) : null;
-    imagePath = (json['images'] as List).map((e) => ApiBaseHelper().getImageUrl(e)).toList();
+    imagePath = (json['images'] as List).map((e) => ApiBaseHelper().getImageProperty(e)).toList();
     bathrooms = json['bathrooms'];
     petsAllowed = json['petsAllowed'];
     amenities = json['amenities'];

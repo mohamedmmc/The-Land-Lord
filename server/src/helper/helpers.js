@@ -1,6 +1,8 @@
 const xml2js = require("xml2js");
 const axios = require("axios");
 const { constantId } = require("../helper/constants");
+const { downloadImage, saveImage, adjustString } = require("../helper/image");
+const path = require("path");
 function addAuthentication(body, targetProperty) {
   const targetObject = body[targetProperty];
 
@@ -167,15 +169,31 @@ async function getDetailedProperties(propertyList) {
         );
 
       // data of table association image and property
-      const mappedImageProp =
+      const mappedImagePromises =
         jsonResult.Pull_ListSpecProp_RS.Property[0].Images?.[0]?.Image?.map(
-          (image) => {
-            return {
-              property_id: ID,
-              url: image["_"],
-            };
+          async (image) => {
+            const imageUrl = image["_"];
+            // Download the image
+            const imageBuffer = await downloadImage(imageUrl);
+
+            try {
+              // Save the resized image
+              const imageNameLarge = `${ID}_${path.basename(imageUrl)}`;
+              const imageName = adjustString(imageNameLarge);
+              const newImageUrl = await saveImage(imageName, imageBuffer);
+              return {
+                property_id: ID,
+                url: imageName,
+              };
+            } catch (error) {
+              console.error("Error processing image:", error);
+              return null;
+            }
           }
         );
+
+      // Wait for all image processing promises to resolve
+      const mappedImageProp = await Promise.all(mappedImagePromises);
 
       // data of table association paiment and property
       const mappedPaiementProperty =

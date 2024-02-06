@@ -14,16 +14,6 @@ class BlockDTO {
   }
 }
 
-class ImageDTO {
-  final String url;
-
-  ImageDTO({required this.url});
-
-  factory ImageDTO.fromJson(Map<String, dynamic> json) {
-    return ImageDTO(url: ApiBaseHelper().getImageUrl(json['url']) );
-  }
-}
-
 class PaymentDTO {
   final String paymentId;
 
@@ -127,7 +117,7 @@ class MappedPropertyDTO {
   final String canSleepMax;
   final String typePropertyId;
   final String objectTypeId;
-  final List<ImageDTO> images;
+  final List<String> images;
   final List<PaymentDTO> payment;
   final List<RoomDTO> rooms;
   final List<AmenityDTO> amenities;
@@ -187,7 +177,9 @@ class MappedPropertyDTO {
       canSleepMax: json['can_sleep_max'],
       typePropertyId: json['type_property_id'],
       objectTypeId: json['objectType_id'],
-      images: List<ImageDTO>.from(json['image'].map((image) => ImageDTO.fromJson(image))),
+      images: List<String>.from(json['image'].map((image) {
+        return ApiBaseHelper().getImageProperty(image['url']);
+      })),
       payment: List<PaymentDTO>.from(json['paiement'].map((payment) => PaymentDTO.fromJson(payment))),
       rooms: List<RoomDTO>.from(json['room'].map((room) => RoomDTO.fromJson(room))),
       amenities: List<AmenityDTO>.from(json['amenities'].map((amenity) => AmenityDTO.fromJson(amenity))),

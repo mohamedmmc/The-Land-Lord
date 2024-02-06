@@ -32,6 +32,11 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.text({ type: "application/xml" }));
 app.use(express.static(path.join(__dirname, "public")));
+// API for uploads file (photo, galleries)
+app.get("/public/properties/:id", (req, res) => {
+  res.sendFile(path.join(__dirname, `./public/properties/${req.params.id}`));
+});
+
 app.use(cors());
 
 // API for uploads file (photo, galleries)

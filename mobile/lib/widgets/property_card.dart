@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:card_swiper/card_swiper.dart';
 import 'package:flutter/material.dart';
 
@@ -16,6 +17,7 @@ class PropertyCard extends StatelessWidget {
   final double? height;
   final bool filtred;
   final VoidCallback? onTap;
+
   const PropertyCard({super.key, required this.property, this.width, this.height, this.filtred = false, this.onTap});
 
   @override
@@ -37,20 +39,31 @@ class PropertyCard extends StatelessWidget {
                       ? Swiper(
                           itemBuilder: (_, int i) => ClipRRect(
                             borderRadius: regularRadius,
+                            // child: CachedNetworkImage(
+                            //   imageUrl: property.imagePath![i],
+                            //   progressIndicatorBuilder: (context, url, downloadProgress) => CircularProgressIndicator(value: downloadProgress.progress),
+                            //   errorWidget: (context, url, error) => const Icon(Icons.error),
+                            //   errorListener: (error){
+                            //     print(error);
+                            //   },
+                            // ),
                             child: Image.network(
                               property.imagePath![i],
                               height: height != null ? height! - 120 : 200,
                               width: width ?? 250,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, error, stackTrace) => ClipRRect(
-                                borderRadius: regularRadius,
-                                child: Image.asset(
-                                  "assets/images/no_image.jpg",
-                                  height: height != null ? height! - 120 : 200,
-                                  width: width ?? 250,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
+                              // errorBuilder: (_, error, stackTrace) {
+                              //   print(error);
+                              //   return ClipRRect(
+                              //     borderRadius: regularRadius,
+                              //     child: Image.asset(
+                              //       "assets/images/no_image.jpg",
+                              //       height: height != null ? height! - 120 : 200,
+                              //       width: width ?? 250,
+                              //       fit: BoxFit.cover,
+                              //     ),
+                              //   );
+                              // },
                             ),
                           ),
                           itemCount: property.imagePath?.length ?? 1,

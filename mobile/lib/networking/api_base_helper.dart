@@ -16,8 +16,8 @@ import 'api_exceptions.dart';
 enum RequestType { get, post, delete, upload, download, put }
 
 // const String baseUrl = '10.0.2.2';
-//  const String baseUrl = '192.168.1.8';
-const String baseUrl = 'localhost';
+ const String baseUrl = '192.168.1.15';
+// const String baseUrl = 'localhost';
 
 class ApiBaseHelper {
   final String _baseUrl = 'http://$baseUrl:3000';
@@ -83,7 +83,7 @@ class ApiBaseHelper {
     return _returnResponse(response);
   }
 
-  String getImageUrl(String pictureName) => 'http://localhost:8080/$pictureName';
+  String getImageProperty(String pictureName) => 'http://localhost:8080/$_baseUrl/public/properties/$pictureName';
 }
 
 dynamic _returnResponse(http.Response response) {
