@@ -90,7 +90,7 @@ class PropertiesScreen extends StatelessWidget {
                                                         filtred: controller.filter?.checkin != null,
                                                         key: Key(controller.filteredProperties[index].id.toString()),
                                                         onTap: (){
-                                                          controller.detailScreen(controller.filteredProperties[index].id ?? '');
+                                                          controller.detailScreen(controller.filteredProperties[index].id ?? '', controller.filteredProperties[index].coordinates!);
                                                         },
                                                       )
                                                   ],

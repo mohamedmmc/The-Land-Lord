@@ -112,20 +112,18 @@ class PropertiesController extends GetxController {
   Future<void> _loadMore() async {
     if (isEndList || Helper.blockRequest.value) return;
     Helper.blockRequest.value = true;
-    Helper.isLoading.value = true;
     await scrollController.animateTo(scrollController.position.maxScrollExtent + 50, duration: Durations.medium1, curve: Curves.bounceIn);
-    isEndList = (await _getProperties()) == 0;
-    Helper.isLoading.value = false;
-    Future.delayed(Durations.long1, () => Helper.blockRequest.value = false);
+    _getProperties().then((value) => Future.delayed(Durations.long1, () => Helper.blockRequest.value = false));
   }
 
-  void detailScreen(String id) {
+  void detailScreen(String id, LatLng coordinates) {
     SharedPreferencesService.find.add('idProperty', id);
     Get.toNamed(PropertyDetailScreen.routeName, arguments: {'id': id});
   }
 
-  Future<int> _getProperties() async {
-    final List<Property> properties = await PropertyRepository.find.getAllProperties(
+  Future<void> _getProperties() async {
+    PropertyRepository.find
+        .getAllProperties(
       page: ++page,
       limit: 8,
       from: filter?.checkin != null ? DateFormat('yyyy-MM-dd').format(filter!.checkin!) : null,
@@ -139,15 +137,18 @@ class PropertiesController extends GetxController {
       priceMax: filter?.priceMax,
       priceMin: filter?.priceMin,
       amenities: filter?.amenities.map((e) => int.parse(e.id)).toList(),
-    );
-    if (properties.isEmpty) isEndList = true;
-    if (page == 1) {
-      filteredProperties = properties;
-    } else {
-      filteredProperties.addAll(properties);
-    }
-    propertiesMarkerLayer = [for (int i = 0; i < filteredProperties.length; i++) LayerLink()];
-    update();
-    return properties.length;
+    )
+        .then((value) {
+      final List<Property> properties = value;
+      if (properties.isEmpty) isEndList = true;
+      if (page == 1) {
+        filteredProperties = properties;
+      } else {
+        filteredProperties.addAll(properties);
+      }
+      propertiesMarkerLayer = [for (int i = 0; i < filteredProperties.length; i++) LayerLink()];
+      update();
+      return properties.length;
+    });
   }
 }

@@ -1,4 +1,9 @@
+import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:the_land_lord_website/networking/api_base_helper.dart';
+
+import '../../helpers/helper.dart';
+import '../../services/main_app_service.dart';
 
 class BlockDTO {
   final String dateFrom;
@@ -60,6 +65,8 @@ class CoordinatesDTO {
       longitude: List<String>.from(json['Longitude']),
     );
   }
+
+  LatLng toLatLng() => LatLng(double.parse(latitude.first), double.parse(longitude.first));
 }
 
 class CheckInOutDTO {
@@ -115,6 +122,8 @@ class MappedPropertyDTO {
   final String space;
   final String standardGuests;
   final String canSleepMax;
+  final String? wcCount;
+  final double? pricePerNight;
   final String typePropertyId;
   final String objectTypeId;
   final List<String> images;
@@ -144,6 +153,8 @@ class MappedPropertyDTO {
     required this.space,
     required this.standardGuests,
     required this.canSleepMax,
+    required this.wcCount,
+    required this.pricePerNight,
     required this.typePropertyId,
     required this.objectTypeId,
     required this.images,
@@ -171,15 +182,15 @@ class MappedPropertyDTO {
       locationId: json['location_id'],
       lastModified: json['last_modified'],
       dateCreated: json['date_created'],
-      cleaningPrice: json['cleaning_price'],
+      cleaningPrice: double.tryParse(json['cleaning_price'])?.toStringAsFixed(1) ?? '0',
       space: json['space'],
       standardGuests: json['standard_guests'],
       canSleepMax: json['can_sleep_max'],
+      wcCount: json['wc_count'],
+      pricePerNight: json['price_per_night'],
       typePropertyId: json['type_property_id'],
       objectTypeId: json['objectType_id'],
-      images: List<String>.from(json['image'].map((image) {
-        return ApiBaseHelper().getImageProperty(image['url']);
-      })),
+      images: List<String>.from(json['image'].map((image) => ApiBaseHelper().getImageFromRentals(image['url']))),
       payment: List<PaymentDTO>.from(json['paiement'].map((payment) => PaymentDTO.fromJson(payment))),
       rooms: List<RoomDTO>.from(json['room'].map((room) => RoomDTO.fromJson(room))),
       amenities: List<AmenityDTO>.from(json['amenities'].map((amenity) => AmenityDTO.fromJson(amenity))),
@@ -194,11 +205,13 @@ class MappedPropertyDTO {
       preparationTimeBeforeArrivalInHours: json['preparation_time_before_arrival_in_hours'],
       isActive: json['is_active'],
       isArchived: json['is_archived'],
-      cancellationPolicies: List<CancellationPolicyDTO>.from(
-        json['cancellation_policies'].map((policy) => CancellationPolicyDTO.fromJson(policy)),
-      ),
+      cancellationPolicies: List<CancellationPolicyDTO>.from(json['cancellation_policies'].map((policy) => CancellationPolicyDTO.fromJson(policy))),
     );
   }
+
+  String getPropertySizeOverview() => '$standardGuests guests • ${rooms.length} bedrooms • $canSleepMax beds • ${wcCount ?? 0} baths';
+
+  String getFullAddress() => '${MainAppServie.find.getLocationNameById(int.parse(locationId))}, $street, $zipCode';
 }
 
 class MappedCalendarDTO {
@@ -219,9 +232,15 @@ class PropertyDetailDTO {
 
   factory PropertyDetailDTO.fromJson(Map<String, dynamic> json) {
     return PropertyDetailDTO(
-        mappedCalendar: List<MappedCalendarDTO>.from(
-          json['mappedCalendar'].map((calendar) => MappedCalendarDTO.fromJson(calendar)),
-        ),
+        mappedCalendar: List<MappedCalendarDTO>.from(json['mappedCalendar'].map((calendar) => MappedCalendarDTO.fromJson(calendar))),
         mappedProperties: MappedPropertyDTO.fromJson(json['mappedProperties']));
+  }
+
+  List<DateTime> getBlackoutDates() {
+    List<DateTime> result = [];
+    for (final element in mappedCalendar) {
+      result.addAll(Helper.getDatesInRange(DateTimeRange(start: DateTime.parse(element.block.dateFrom), end: DateTime.parse(element.block.dateTo))));
+    }
+    return result;
   }
 }

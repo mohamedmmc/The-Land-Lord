@@ -53,9 +53,6 @@ async function getDetailedProperties(propertyList) {
 
   for (const [index, property] of propertyList.entries()) {
     const ID = property.id;
-    if (ID == "3131909") {
-      console.log("bon");
-    }
     // const ID = propertyList[0].id;
     var body = {
       Pull_ListSpecProp_RQ: {
@@ -178,13 +175,13 @@ async function getDetailedProperties(propertyList) {
           async (image) => {
             const imageUrl = image["_"];
             // Download the image
-            // const imageBuffer = await downloadImage(imageUrl);
+            const imageBuffer = await downloadImage(imageUrl);
 
             try {
               // Save the resized image
               const imageNameLarge = `${ID}_${path.basename(imageUrl)}`;
               const imageName = adjustString(imageNameLarge);
-              // const newImageUrl = await saveImage(imageName, imageBuffer);
+              await saveImage(imageName, imageBuffer);
               return {
                 property_id: ID,
                 url: imageName,

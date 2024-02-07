@@ -18,8 +18,9 @@ class Helper {
   static RxBool blockRequest = false.obs;
   static RxBool isLoading = true.obs;
 
-  static void snackBar({String message = 'Snack bar test', String? title, Duration? duration, bool includeDismiss = true, Widget? overrideButton,TextStyle? styleMessage}) => GetSnackBar(
-        titleText: title != null ? Text(title, style: styleMessage ?? AppFonts.x14Bold.copyWith(color: kNeutralColor100) ) : null,
+  static void snackBar({String message = 'Snack bar test', String? title, Duration? duration, bool includeDismiss = true, Widget? overrideButton, TextStyle? styleMessage}) =>
+      GetSnackBar(
+        titleText: title != null ? Text(title, style: styleMessage ?? AppFonts.x14Bold.copyWith(color: kNeutralColor100)) : null,
         message: message,
         duration: duration ?? const Duration(seconds: 3),
         isDismissible: true,
@@ -91,9 +92,7 @@ class Helper {
         return 'Unknown';
     }
   }
-  static void pushScreen(String route, {dynamic args}) {
-     Get.toNamed(route,arguments: args);
-  }
+
   static String getDayFullName(int day) => DateFormat('EEEE').format(DateTime(2023, 5, day));
 
   static DateTime parseDisplayedDate(String date) => DateFormat('MMM d, h:mm a').parse(date).copyWith(year: DateTime.now().year);
@@ -145,5 +144,15 @@ class Helper {
     final encrypter = enc.Encrypter(enc.AES(key));
     final decrypted = encrypter.decrypt64(encryptedPassword, iv: iv);
     return decrypted;
+  }
+
+  static List<DateTime> getDatesInRange(DateTimeRange range) {
+    final days = getDurationInRange(range);
+    return List<DateTime>.generate(days, (index) => range.start.add(Duration(days: index)));
+  }
+
+  static int getDurationInRange(DateTimeRange range) {
+    if (range.start.isAfter(range.end)) throw ArgumentError('From date cannot be after to date');
+    return range.end.difference(range.start).inDays + 1;
   }
 }

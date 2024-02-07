@@ -13,7 +13,10 @@ class MainAppServie extends GetxService {
 
   // bool get isUserLoggedIn => SharedPreferencesService.find.get('jwt') != null;
   String getTypeNameById(int id) => filterData!.propertyTypelist.singleWhere((element) => element.id == id).name;
+
   int getTypeIdByName(String name) => filterData!.propertyTypelist.singleWhere((element) => element.name == name).id;
+
+  String getAmenityNameById(String id) => filterData!.listAmenities.cast<Amenity?>().singleWhere((element) => element?.id == id, orElse: () => null)?.name ?? 'Not Found';
 
   String getLocationNameById(int id) {
     try {
