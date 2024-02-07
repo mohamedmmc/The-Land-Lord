@@ -6,6 +6,7 @@ const Reservation = sequelize.define(
     id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
     date_from: { type: Sequelize.STRING, allowNull: false },
     date_to: { type: Sequelize.STRING, allowNull: false },
+    property_id: { type: Sequelize.STRING, allowNull: true },
   },
   {
     tableName: "reservation",
@@ -13,7 +14,7 @@ const Reservation = sequelize.define(
   }
 );
 
-Reservation.belongsTo(Property, { foreignKey: "property_id" });
+Reservation.belongsTo(Property, { foreignKey: "property_id", allowNull: true });
 module.exports = {
   Reservation,
 };

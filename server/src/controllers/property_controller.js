@@ -51,7 +51,7 @@ exports.getAvailable = async (req, res) => {
       JOIN property_image ON property.id = property_image.property_id
       JOIN location ON property.location_id = location.id
       JOIN description ON property.id = description.property_id
-      LEFT JOIN property_price ON property.id = property_price.property_id AND CAST(:dateFrom AS DATE) BETWEEN property_price.date_from AND property_price.date_to
+      LEFT JOIN property_price ON property.id = property_price.property_id AND CAST(:dateFrom AS DATE) >= CAST(property_price.date_from AS DATE)
       LEFT JOIN property_amenity ON property.id = property_amenity.property_id
       WHERE property.is_active = 'true'
       ${

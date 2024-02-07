@@ -59,30 +59,7 @@ exports.getAll = async (req, res) => {
     await Property.destroy({ where: {} });
     for (const [index, property] of listDetailProperties.entries()) {
       // adresse = property[index].id;
-      await Property.bulkCreate(property, {
-        updateOnDuplicate: ["name"],
-        updateOnDuplicate: ["last_modified"],
-        updateOnDuplicate: ["street"],
-        updateOnDuplicate: ["date_created"],
-        updateOnDuplicate: ["cleaning_price"],
-        updateOnDuplicate: ["space"],
-        updateOnDuplicate: ["standard_guests"],
-        updateOnDuplicate: ["can_sleep_max"],
-        updateOnDuplicate: ["zip_code"],
-        updateOnDuplicate: ["floor"],
-        updateOnDuplicate: ["preparation_time_before_arrival"],
-        updateOnDuplicate: ["napreparation_time_before_arrival_in_hoursme"],
-        updateOnDuplicate: ["is_active"],
-        updateOnDuplicate: ["is_archived"],
-        updateOnDuplicate: ["location_id"],
-        updateOnDuplicate: ["coordinates"],
-        updateOnDuplicate: ["arrival_instructions"],
-        updateOnDuplicate: ["check_in_out"],
-        updateOnDuplicate: ["deposit_id"],
-        updateOnDuplicate: ["deposit_value"],
-        updateOnDuplicate: ["cancellation_policies"],
-        updateOnDuplicate: ["type_property_id"],
-      });
+      await Property.bulkCreate(property);
       createdProperties.push(property);
     }
 
@@ -258,8 +235,12 @@ exports.getReservations = async (req, res) => {
       console.log(`${index} of ${locationList.length}`);
     }
     await Reservation.destroy({ where: {} });
-    const reservationSaved = await Reservation.bulkCreate(listReservations);
-    return res.status(200).json({ reservationSaved });
+    for (const reservation of listReservations) {
+      Reservation.create(reservation).catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+    }
+    return res.status(200).json({ listReservations });
   } catch (error) {
     return res.status(500).json({ error });
   }
