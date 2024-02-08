@@ -1,5 +1,6 @@
 const { sequelize } = require("../../db.config");
 const { getDate, getRentalsResponse } = require("../helper/helpers");
+const { fetchNames, getImageByPropertyId } = require("../helper/sql_request");
 const { locationGroup } = require("../helper/constants");
 // get all regions by available properties
 exports.getAvailable = async (req, res) => {
@@ -168,12 +169,13 @@ exports.getDetail = async (req, res) => {
       PropertyID: ID,
     },
   };
+
   try {
     var jsonResult = await getRentalsResponse(body, "Pull_ListSpecProp_RQ");
 
     // data of detailed property
-    const mappedProperties = jsonResult.Pull_ListSpecProp_RS.Property.map(
-      (property) => ({
+    const mappedPropertiesRentals =
+      jsonResult.Pull_ListSpecProp_RS.Property.map((property) => ({
         id: property.ID[0]["_"],
         name: property.Name[0],
         location_id: property.DetailedLocationID[0]["_"],
@@ -186,11 +188,6 @@ exports.getDetail = async (req, res) => {
         type_property_id: property.PropertyTypeID[0],
         objectType_id: property.ObjectTypeID[0],
         // noOfUnits: property.NoOfUnits[0],
-        image: property.Images?.[0]?.Image?.map((image) => {
-          return {
-            url: image["_"],
-          };
-        }),
         paiement: property.PaymentMethods?.[0]?.PaymentMethod?.map(
           (paiement) => {
             return {
@@ -221,9 +218,29 @@ exports.getDetail = async (req, res) => {
         preparation_time_before_arrival:
           property.PreparationTimeBeforeArrival[0],
         preparation_time_before_arrival_in_hours:
-          property.PreparationTimeBeforeArrivalInHours[0],
+          property.PreparationTimeBeforeArrivalInHours[0] + " H",
         is_active: property.IsActive[0],
         is_archived: property.IsArchived[0],
+        houseRules:
+          jsonResult.Pull_ListSpecProp_RS.Property[0].Descriptions?.[0]?.Description?.map(
+            (description) => {
+              return {
+                house_rules:
+                  description?.HouseRules != null
+                    ? description?.HouseRules[0]
+                    : "",
+              };
+            }
+          ),
+        description:
+          jsonResult.Pull_ListSpecProp_RS.Property[0].Descriptions?.[0]?.Description?.map(
+            (description) => {
+              return {
+                language_id: description["$"].LanguageID,
+                text: description.Text[0],
+              };
+            }
+          ),
         //terms_and_conditions_links: property.TermsAndConditionsLinks[0],
         cancellation_policies:
           property.CancellationPolicies[0].CancellationPolicy?.map(
@@ -235,15 +252,98 @@ exports.getDetail = async (req, res) => {
               };
             }
           ),
-      })
+      }));
+
+    var bodyDetailLocation = {
+      Pull_GetLocationDetails_RQ: {
+        Authentication: {
+          UserName: process.env.RENTALS_UNITED_LOGIN,
+          Password: process.env.RENTALS_UNITED_PASS,
+        },
+        LocationID: mappedPropertiesRentals[0].location_id,
+      },
+    };
+    var jsonResultLocation = await getRentalsResponse(
+      bodyDetailLocation,
+      "Pull_GetLocationDetails_RQ"
     );
+
+    const mappedLocation =
+      jsonResultLocation.Pull_GetLocationDetails_RS.Locations[0].Location.filter(
+        (location) => ["2", "3", "4"].includes(location["$"].LocationTypeID)
+      ).reduce((acc, location, index, arr) => {
+        acc["id"] = mappedPropertiesRentals[0].location_id;
+        if (!acc["name"]) {
+          acc["name"] = location["_"];
+        } else {
+          acc["name"] += ", " + location["_"];
+        }
+        return acc;
+      }, {});
+
+    const { deposit_id, amenities, room, paiement } =
+      mappedPropertiesRentals[0];
+
+    // get informations from database with ids of rentals
+    const [depositNames, amenityNames, roomNames, paiementNames, images] =
+      await Promise.all([
+        fetchNames([deposit_id], "type_deposit"),
+        fetchNames(
+          amenities.map((amenity) => amenity.amenity_id),
+          "amenity"
+        ),
+        fetchNames(
+          room.map((room) => room.room_id),
+          "type_room"
+        ),
+        fetchNames(
+          paiement.map((paiement) => paiement.payement_id),
+          "type_payement"
+        ),
+        getImageByPropertyId(ID),
+      ]);
+
+    // delete properties with id to replaces with object containing names
+    const mappedProperties = mappedPropertiesRentals.map((property) => {
+      const updatedProperty = { ...property };
+
+      delete updatedProperty.location_id;
+      delete updatedProperty.amenities;
+      delete updatedProperty.paiement;
+      delete updatedProperty.room;
+      delete updatedProperty.deposit_id;
+
+      updatedProperty.location = mappedLocation;
+      updatedProperty.amenity = amenityNames;
+      updatedProperty.paiement = paiementNames;
+      updatedProperty.room = roomNames;
+      updatedProperty.images = images;
+      updatedProperty.deposit = depositNames.map((deposit) => {
+        return {
+          id: deposit.id,
+          name: deposit.name,
+          value: mappedPropertiesRentals[0].deposit_value,
+        };
+      });
+      delete updatedProperty.deposit_value;
+      return updatedProperty;
+    });
+    return res.status(200).json({ mappedProperties });
+  } catch (error) {
+    return res.status(500).json({ message: error });
+  }
+};
+exports.getCalendarPropertyId = async (req, res) => {
+  const ID = req.params.id;
+  const locationId = req.params.location;
+  try {
     var bodyAvailibility = {
       Pull_ListPropertiesBlocks_RQ: {
         Authentication: {
           UserName: process.env.RENTALS_UNITED_LOGIN,
           Password: process.env.RENTALS_UNITED_PASS,
         },
-        LocationID: mappedProperties[0].location_id,
+        LocationID: locationId,
         DateFrom: getDate(0, "years"),
         DateTo: getDate(1, "years"),
       },
@@ -264,10 +364,7 @@ exports.getDetail = async (req, res) => {
           },
         }))
       );
-
-    return res
-      .status(200)
-      .json({ mappedCalendar, mappedProperties: mappedProperties[0] });
+    return res.status(200).json({ mappedCalendar });
   } catch (error) {
     return res.status(500).json({ message: error });
   }

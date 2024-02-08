@@ -36,6 +36,7 @@ const Property = sequelize.define(
 
 Property.belongsTo(Location, { foreignKey: "location_id" });
 Property.belongsTo(DepositType, { foreignKey: "deposit_id" });
+
 module.exports = {
   Property,
 };

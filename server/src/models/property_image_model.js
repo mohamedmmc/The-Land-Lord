@@ -4,6 +4,7 @@ const PropertyImage = sequelize.define(
   "property_image",
   {
     id: { type: Sequelize.INTEGER, primaryKey: true, autoIncrement: true },
+    thumbnail: { type: Sequelize.STRING, allowNull: false },
     url: { type: Sequelize.STRING, allowNull: false },
   },
   {

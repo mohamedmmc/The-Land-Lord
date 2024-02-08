@@ -1,9 +1,11 @@
 const xml2js = require("xml2js");
 const axios = require("axios");
 const { constantId } = require("../helper/constants");
-const { downloadImage, saveImage, adjustString } = require("../helper/image");
+const { downloadImage, saveImage } = require("../helper/image");
 const path = require("path");
 const { log } = require("console");
+const { PropertyImage } = require("../models/property_image_model");
+const { Property } = require("../models/property_model");
 function addAuthentication(body, targetProperty) {
   const targetObject = body[targetProperty];
 
@@ -53,9 +55,6 @@ async function getDetailedProperties(propertyList) {
 
   for (const [index, property] of propertyList.entries()) {
     const ID = property.id;
-    if (ID == "3131909") {
-      console.log("bon");
-    }
     // const ID = propertyList[0].id;
     var body = {
       Pull_ListSpecProp_RQ: {
@@ -131,110 +130,93 @@ async function getDetailedProperties(propertyList) {
         })
       );
 
-      // if (mappedProperties[0].is_active === "true") {
-      var jsonResultPrice = await getRentalsResponse(
-        bodyPrice,
-        "Pull_ListPropertyPrices_RQ"
-      );
-
-      const mappedPriceProperty =
-        jsonResultPrice.Pull_ListPropertyPrices_RS.Prices?.[0]?.Season?.map(
-          (season) => {
-            return {
-              property_id: ID,
-              price: season.Price[0],
-              date_from: season["$"].DateFrom,
-              date_to: season["$"].DateTo,
-            };
-          }
+      if (mappedProperties[0].is_active === "true") {
+        var jsonResultPrice = await getRentalsResponse(
+          bodyPrice,
+          "Pull_ListPropertyPrices_RQ"
         );
 
-      // data of table association amenities and property
-      const mappedPropAmenity =
-        jsonResult.Pull_ListSpecProp_RS.Property[0].Amenities?.[0]?.Amenity?.map(
-          (amenity) => {
-            return {
-              property_id: ID,
-              amenity_id: amenity["_"],
-              count: amenity["$"].Count,
-            };
-          }
-        );
-
-      // data of table association room and property
-      const mappedPropRoom =
-        jsonResult.Pull_ListSpecProp_RS.Property[0].CompositionRoomsAmenities?.[0]?.CompositionRoomAmenities?.map(
-          (room) => {
-            return {
-              property_id: ID,
-              room_id: room["$"].CompositionRoomID,
-            };
-          }
-        );
-
-      // data of table association image and property
-      const mappedImagePromises =
-        jsonResult.Pull_ListSpecProp_RS.Property[0].Images?.[0]?.Image?.map(
-          async (image) => {
-            const imageUrl = image["_"];
-            // Download the image
-            // const imageBuffer = await downloadImage(imageUrl);
-
-            try {
-              // Save the resized image
-              const imageNameLarge = `${ID}_${path.basename(imageUrl)}`;
-              const imageName = adjustString(imageNameLarge);
-              // const newImageUrl = await saveImage(imageName, imageBuffer);
+        const mappedPriceProperty =
+          jsonResultPrice.Pull_ListPropertyPrices_RS.Prices?.[0]?.Season?.map(
+            (season) => {
               return {
                 property_id: ID,
-                url: imageName,
+                price: season.Price[0],
+                date_from: season["$"].DateFrom,
+                date_to: season["$"].DateTo,
               };
-            } catch (error) {
-              console.error("Error processing image:", error);
-              return null;
             }
-          }
+          );
+
+        // data of table association amenities and property
+        const mappedPropAmenity =
+          jsonResult.Pull_ListSpecProp_RS.Property[0].Amenities?.[0]?.Amenity?.map(
+            (amenity) => {
+              return {
+                property_id: ID,
+                amenity_id: amenity["_"],
+                count: amenity["$"].Count,
+              };
+            }
+          );
+
+        // data of table association room and property
+        const mappedPropRoom =
+          jsonResult.Pull_ListSpecProp_RS.Property[0].CompositionRoomsAmenities?.[0]?.CompositionRoomAmenities?.map(
+            (room) => {
+              return {
+                property_id: ID,
+                room_id: room["$"].CompositionRoomID,
+              };
+            }
+          );
+
+        // data of table association image and property
+        const mappedImagePromises = await resizeImageFromRentals(
+          jsonResult.Pull_ListSpecProp_RS.Property[0].Images?.[0]?.Image,
+          ID
         );
 
-      // Wait for all image processing promises to resolve
-      const mappedImageProp = await Promise.all(mappedImagePromises);
+        // Wait for all image processing promises to resolve
+        const mappedImageProp = await Promise.all(mappedImagePromises);
 
-      // data of table association paiment and property
-      const mappedPaiementProperty =
-        jsonResult.Pull_ListSpecProp_RS.Property[0].PaymentMethods?.[0]?.PaymentMethod?.map(
-          (paiement) => {
-            return {
-              property_id: ID,
-              payement_id: paiement["$"].PaymentMethodID,
-            };
-          }
-        );
+        // data of table association paiment and property
+        const mappedPaiementProperty =
+          jsonResult.Pull_ListSpecProp_RS.Property[0].PaymentMethods?.[0]?.PaymentMethod?.map(
+            (paiement) => {
+              return {
+                property_id: ID,
+                payement_id: paiement["$"].PaymentMethodID,
+              };
+            }
+          );
 
-      // data of table descriptin of property
-      const mappedDescription =
-        jsonResult.Pull_ListSpecProp_RS.Property[0].Descriptions?.[0]?.Description?.map(
-          (description) => {
-            return {
-              property_id: ID,
-              language_id: description["$"].LanguageID,
-              text: description.Text[0],
-              house_rules:
-                description?.HouseRules != null
-                  ? description?.HouseRules[0]
-                  : "",
-            };
-          }
-        );
-      if (mappedPropAmenity) listPropAmenity.push(mappedPropAmenity);
-      if (mappedPropRoom) listRoomProp.push(mappedPropRoom);
-      if (mappedProperties) listDetailProperties.push(mappedProperties);
-      if (mappedImageProp) listImageProperty.push(mappedImageProp);
-      if (mappedPaiementProperty)
-        listPaiementProperty.push(mappedPaiementProperty);
-      if (mappedDescription) listDescriptionProperty.push(mappedDescription);
-      if (mappedPriceProperty) listPriceProperty.push(mappedPriceProperty);
-      console.log(`${index} of ${propertyList.length}`);
-      // }
+        // data of table descriptin of property
+        const mappedDescription =
+          jsonResult.Pull_ListSpecProp_RS.Property[0].Descriptions?.[0]?.Description?.map(
+            (description) => {
+              return {
+                property_id: ID,
+                language_id: description["$"].LanguageID,
+                text: description.Text[0],
+                house_rules:
+                  description?.HouseRules != null
+                    ? description?.HouseRules[0]
+                    : "",
+              };
+            }
+          );
+        if (mappedPropAmenity) listPropAmenity.push(mappedPropAmenity);
+        if (mappedPropRoom) listRoomProp.push(mappedPropRoom);
+        if (mappedProperties) listDetailProperties.push(mappedProperties);
+        if (mappedImageProp) listImageProperty.push(mappedImageProp);
+        if (mappedPaiementProperty)
+          listPaiementProperty.push(mappedPaiementProperty);
+        if (mappedDescription) listDescriptionProperty.push(mappedDescription);
+        if (mappedPriceProperty) listPriceProperty.push(mappedPriceProperty);
+        console.log(`${index} of ${propertyList.length}`);
+        // }
+      }
     } catch (error) {
       console.error(`Error fetching details for property ${ID}`, error);
     }
@@ -304,6 +286,39 @@ function calculateDateDifference(date1Str, date2Str, unit = "days") {
         "Invalid unit. Use 'days', 'weeks', 'months', or 'years'."
       );
   }
+}
+
+function resizeImageFromRentals(list, ID) {
+  // Directly filter images within the map function for conciseness
+  return list.map(async (image, index) => {
+    const imageUrl = image["_"];
+
+    // Only process images matching the specified URL pattern
+    const imageName = `${ID}_${index}.jpg`;
+
+    // Optional image download and saving logic (replace with your actual implementation):
+    try {
+      const founedProperty = await PropertyImage.findOne({
+        where: {
+          url: imageUrl,
+        },
+      });
+      if (!founedProperty) {
+        const imageBuffer = await downloadImage(imageUrl);
+        await saveImage(imageName, imageBuffer);
+      }
+    } catch (error) {
+      console.error("Error processing image:", error);
+      // Return an empty object to signify an error
+      return {};
+    }
+
+    return {
+      url: imageUrl,
+      property_id: ID,
+      thumbnail: imageName,
+    };
+  });
 }
 
 module.exports = {

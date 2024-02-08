@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const sharp = require("sharp");
 const { execSync } = require("child_process");
+
 // Function to download image from URL
 async function downloadImage(imageUrl) {
   const response = await axios.get(imageUrl, {
@@ -37,18 +38,5 @@ async function saveImage(imageName, imageBuffer) {
     throw error;
   }
 }
-function adjustString(inputString) {
-  const jpgIndex = inputString.lastIndexOf(".jpg");
-  const jpegIndex = inputString.lastIndexOf(".jpeg");
-  const pngIndex = inputString.lastIndexOf(".png");
 
-  const index = Math.max(jpgIndex, jpegIndex, pngIndex);
-
-  if (index !== -1) {
-    return inputString.substring(0, index + 4);
-  } else {
-    return inputString;
-  }
-}
-
-module.exports = { downloadImage, saveImage, adjustString };
+module.exports = { downloadImage, saveImage };

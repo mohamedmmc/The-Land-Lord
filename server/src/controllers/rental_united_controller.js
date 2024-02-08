@@ -83,7 +83,14 @@ exports.getAll = async (req, res) => {
     await PropertyImage.destroy({ where: {} });
     // list association property image
     for (const imageProp of listImageProperty) {
-      await PropertyImage.bulkCreate(imageProp);
+      listImageProperty[42];
+      if (imageProp !== null) {
+        // Check for null
+        await PropertyImage.bulkCreate(imageProp);
+      } else {
+        // Handle null imageProp, e.g., log a warning or take other actions
+        console.warn("Skipping null image property.");
+      }
     }
 
     await PropertyPaiement.destroy({ where: {} });
@@ -97,12 +104,25 @@ exports.getAll = async (req, res) => {
     for (const description of listDescriptionProperty) {
       await Description.bulkCreate(description);
     }
+    const listReservations = await getAllReservation();
+    await Reservation.destroy({ where: {} });
+    for (const reservation of listReservations) {
+      const foundedProperty = await Property.findOne({
+        where: { id: reservation.property_id },
+      });
+      if (foundedProperty) {
+        Reservation.create(reservation).catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+      }
+    }
     return res.status(200).json(
       createdProperties
       // test.detailedProperties[0]
       // test.detailedProperties[0].Pull_ListSpecProp_RS.Property
     );
   } catch (error) {
+    // console.log(error);
     return res.status(500).json({ error });
   }
 };
@@ -189,59 +209,70 @@ exports.propertyType = async (req, res) => {
 
 exports.getReservations = async (req, res) => {
   try {
-    var listReservations = [];
-    const oneYearLaterFormatted = getDate(1, "years");
-    const nowFormatted = getDate(0, "years");
-    const query = `
+    const reservations = await getAllReservation();
+    await Reservation.destroy({ where: {} });
+    for (const reservation of reservations) {
+      const foundedProperty = await Property.findOne({
+        where: { id: reservation.property_id },
+      });
+      if (foundedProperty) {
+        Reservation.create(reservation).catch((error) => {
+          console.error("Error fetching data:", error);
+        });
+      }
+    }
+    return res.status(200).json(reservations);
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
+};
+
+async function getAllReservation() {
+  var listReservations = [];
+  const oneYearLaterFormatted = getDate(1, "years");
+  const nowFormatted = getDate(0, "years");
+  const query = `
     SELECT location.id ,location.name, COUNT(location.name) as count FROM location
     JOIN property on location.id = property.location_id
     WHERE property.is_active = 'true'
     GROUP by location.name
   `;
-    const locationList = await sequelize.query(query, {
-      type: sequelize.QueryTypes.SELECT,
-    });
-    let index = 0;
-    for (const location of locationList) {
-      const body = {
-        Pull_ListPropertiesBlocks_RQ: {
-          Authentication: {
-            UserName: process.env.RENTALS_UNITED_LOGIN,
-            Password: process.env.RENTALS_UNITED_PASS,
-          },
-          LocationID: location.id,
-          DateFrom: nowFormatted,
-          DateTo: oneYearLaterFormatted,
+  const locationList = await sequelize.query(query, {
+    type: sequelize.QueryTypes.SELECT,
+  });
+  let index = 0;
+  for (const location of locationList) {
+    const body = {
+      Pull_ListPropertiesBlocks_RQ: {
+        Authentication: {
+          UserName: process.env.RENTALS_UNITED_LOGIN,
+          Password: process.env.RENTALS_UNITED_PASS,
         },
-      };
-      const propertyListJson = await getRentalsResponse(
-        body,
-        "Pull_ListPropertiesBlocks_RQ"
-      );
+        LocationID: location.id,
+        DateFrom: nowFormatted,
+        DateTo: oneYearLaterFormatted,
+      },
+    };
+    const propertyListJson = await getRentalsResponse(
+      body,
+      "Pull_ListPropertiesBlocks_RQ"
+    );
 
-      if (propertyListJson.Pull_ListPropertiesBlocks_RS.Properties[0] !== "")
-        for (const propertyReservation of propertyListJson
-          .Pull_ListPropertiesBlocks_RS.Properties?.[0]?.PropertyBlock) {
-          for (const dates of propertyReservation.Block) {
-            const reservation = {
-              property_id: propertyReservation["$"].PropertyID,
-              date_from: dates.DateFrom[0],
-              date_to: dates.DateTo[0],
-            };
-            listReservations.push(reservation);
-          }
+    if (propertyListJson.Pull_ListPropertiesBlocks_RS.Properties[0] !== "")
+      for (const propertyReservation of propertyListJson
+        .Pull_ListPropertiesBlocks_RS.Properties?.[0]?.PropertyBlock) {
+        for (const dates of propertyReservation.Block) {
+          const reservation = {
+            property_id: propertyReservation["$"].PropertyID,
+            date_from: dates.DateFrom[0],
+            date_to: dates.DateTo[0],
+          };
+          listReservations.push(reservation);
         }
-      index++;
-      console.log(`${index} of ${locationList.length}`);
-    }
-    await Reservation.destroy({ where: {} });
-    for (const reservation of listReservations) {
-      Reservation.create(reservation).catch((error) => {
-        console.error("Error fetching data:", error);
-      });
-    }
-    return res.status(200).json({ listReservations });
-  } catch (error) {
-    return res.status(500).json({ error });
+      }
+    index++;
+    console.log(`${index} of ${locationList.length}`);
   }
-};
+
+  return listReservations;
+}
