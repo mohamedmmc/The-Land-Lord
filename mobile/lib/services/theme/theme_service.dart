@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../constants/shared_preferences_keys.dart';
+import '../../utils/constants/shared_preferences_keys.dart';
 
 class ThemeService {
   // static ThemeService get find => Get.find<ThemeService>();

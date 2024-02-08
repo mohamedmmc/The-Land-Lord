@@ -9,8 +9,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../utils/constants/colors.dart';
 import '../utils/constants/sizes.dart';
-import '../utils/logger_service.dart';
-import '../utils/theme/theme.dart';
+import '../services/logger_service.dart';
+import '../services/theme/theme.dart';
 
 class Helper {
   static Timer? _searchOnStoppedTyping;
@@ -147,12 +147,12 @@ class Helper {
   }
 
   static List<DateTime> getDatesInRange(DateTimeRange range) {
-    final days = getDurationInRange(range);
+    final days = getDurationInRange(range) + 1;
     return List<DateTime>.generate(days, (index) => range.start.add(Duration(days: index)));
   }
 
   static int getDurationInRange(DateTimeRange range) {
     if (range.start.isAfter(range.end)) throw ArgumentError('From date cannot be after to date');
-    return range.end.difference(range.start).inDays + 1;
+    return range.end.difference(range.start).inDays;
   }
 }

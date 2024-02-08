@@ -10,7 +10,7 @@ import '../../utils/constants/assets.dart';
 import '../../utils/constants/colors.dart';
 import '../../utils/constants/constants.dart';
 import '../../utils/constants/sizes.dart';
-import '../../utils/theme/theme.dart';
+import '../../services/theme/theme.dart';
 import '../../widgets/custom_appbar.dart';
 import '../../widgets/custom_marker.dart';
 import '../../widgets/property_card.dart';
@@ -89,9 +89,8 @@ class PropertiesScreen extends StatelessWidget {
                                                         property: controller.filteredProperties[index],
                                                         filtred: controller.filter?.checkin != null,
                                                         key: Key(controller.filteredProperties[index].id.toString()),
-                                                        onTap: (){
-                                                          controller.detailScreen(controller.filteredProperties[index].id ?? '', controller.filteredProperties[index].coordinates!);
-                                                        },
+                                                        onTap: () => controller.detailScreen(
+                                                            controller.filteredProperties[index].id ?? '', controller.filteredProperties[index].pricePerNight!),
                                                       )
                                                   ],
                                                 ),

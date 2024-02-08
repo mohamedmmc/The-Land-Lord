@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'services/main_app_service.dart';
-import 'utils/logger_service.dart';
-import 'utils/shared_preferences.dart';
+import 'services/logger_service.dart';
+import 'services/shared_preferences.dart';
 import 'views/properties/properties_controller.dart';
 
 void main() {

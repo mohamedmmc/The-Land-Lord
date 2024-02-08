@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:the_land_lord_website/utils/theme/theme.dart';
+import 'package:the_land_lord_website/services/theme/theme.dart';
 
 import '../utils/constants/colors.dart';
 import '../utils/constants/sizes.dart';
@@ -23,6 +23,7 @@ class CustomButtons extends StatelessWidget {
   final Color? buttonColor;
   final Size? minimumSize;
   final EdgeInsets? padding;
+  final BorderSide? borderSide;
 
   const CustomButtons.elevatePrimary({
     required this.onPressed,
@@ -36,6 +37,7 @@ class CustomButtons extends StatelessWidget {
     this.disabled = false,
     this.buttonColor,
     this.padding,
+    this.borderSide,
   })  : buttonType = ButtonType.elevatePrimary,
         icon = null,
         iconSize = null,
@@ -55,6 +57,7 @@ class CustomButtons extends StatelessWidget {
     this.disabled = false,
     this.padding,
     this.icon,
+    this.borderSide,
   })  : buttonType = ButtonType.elevateSecondary,
         iconSize = null,
         iconColor = null,
@@ -74,6 +77,7 @@ class CustomButtons extends StatelessWidget {
         buttonType = ButtonType.text,
         loading = false,
         icon = null,
+        borderSide = null,
         width = null,
         height = null,
         iconSize = null,
@@ -97,6 +101,7 @@ class CustomButtons extends StatelessWidget {
         titleStyle = null,
         width = null,
         height = null,
+        borderSide = null,
         loading = false,
         buttonColor = null,
         minimumSize = null,
@@ -115,6 +120,7 @@ class CustomButtons extends StatelessWidget {
         title = null,
         titleStyle = null,
         width = null,
+        borderSide = null,
         height = null,
         loading = false,
         iconSize = null,
@@ -129,8 +135,9 @@ class CustomButtons extends StatelessWidget {
         return ElevatedButton(
           style: ButtonStyle(
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(5)),
+              RoundedRectangleBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(5)),
+                side: borderSide ?? BorderSide.none,
               ),
             ),
             padding: MaterialStateProperty.all(padding ?? const EdgeInsets.symmetric(horizontal: Paddings.regular)),
@@ -169,9 +176,9 @@ class CustomButtons extends StatelessWidget {
         return ElevatedButton(
           style: ButtonStyle(
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-              const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(5)),
-                side: BorderSide(color: kPrimaryColor),
+              RoundedRectangleBorder(
+                borderRadius: const BorderRadius.all(Radius.circular(5)),
+                side: borderSide ?? const BorderSide(color: kPrimaryColor),
               ),
             ),
             padding: MaterialStateProperty.all(padding ?? EdgeInsets.zero),

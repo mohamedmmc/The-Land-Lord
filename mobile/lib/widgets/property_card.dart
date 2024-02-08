@@ -6,7 +6,7 @@ import '../services/main_app_service.dart';
 import '../utils/constants/colors.dart';
 import '../utils/constants/constants.dart';
 import '../utils/constants/sizes.dart';
-import '../utils/theme/theme.dart';
+import '../services/theme/theme.dart';
 import 'custom_buttons.dart';
 import 'overflowed_text_with_tooltip.dart';
 

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:the_land_lord_website/helpers/helper.dart';
-import 'package:the_land_lord_website/utils/theme/theme.dart';
+import 'package:the_land_lord_website/services/theme/theme.dart';
 import 'package:the_land_lord_website/widgets/custom_buttons.dart';
 import 'package:the_land_lord_website/widgets/custom_text_field.dart';
 import 'package:the_land_lord_website/widgets/property_filter/property_filter_controller.dart';
 
+import '../../../helpers/buildables.dart';
 import '../../../services/main_app_service.dart';
 import '../../../utils/constants/colors.dart';
 import '../../../utils/constants/constants.dart';
@@ -110,10 +111,9 @@ class MoreFiltersPopup extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: Paddings.large),
-                              Divider(color: kNeutralLightColor.withAlpha(150)),
+                              Buildables.lightDivider(),
                               const Padding(
-                                padding: EdgeInsets.symmetric(vertical: Paddings.regular),
+                                padding: EdgeInsets.only(bottom: Paddings.regular),
                                 child: Text('Beds and bathrooms', style: AppFonts.x18Bold),
                               ),
                               const Padding(
@@ -149,10 +149,9 @@ class MoreFiltersPopup extends StatelessWidget {
                                 },
                                 selected: controller.filter?.bathrooms == 5 ? '5+' : controller.filter?.bathrooms?.toString() ?? 'Any',
                               ),
-                              const SizedBox(height: Paddings.large),
-                              Divider(color: kNeutralLightColor.withAlpha(150)),
+                              Buildables.lightDivider(),
                               const Padding(
-                                padding: EdgeInsets.symmetric(vertical: Paddings.regular),
+                                padding: EdgeInsets.only(bottom: Paddings.large),
                                 child: Text('Property type', style: AppFonts.x18Bold),
                               ),
                               buildChips(
@@ -164,10 +163,9 @@ class MoreFiltersPopup extends StatelessWidget {
                                   controller.updateFilterModel(type: value == 'Any' ? null : MainAppServie.find.getTypeIdByName(value.toString()));
                                 },
                               ),
-                              const SizedBox(height: Paddings.large),
-                              Divider(color: kNeutralLightColor.withAlpha(150)),
+                              Buildables.lightDivider(),
                               const Padding(
-                                padding: EdgeInsets.symmetric(vertical: Paddings.regular),
+                                padding: EdgeInsets.only(bottom: Paddings.regular),
                                 child: Text('Amenities', style: AppFonts.x18Bold),
                               ),
                               Padding(

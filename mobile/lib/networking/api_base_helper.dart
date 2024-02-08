@@ -9,9 +9,9 @@ import 'package:mime/mime.dart';
 import 'package:the_land_lord_website/utils/constants/colors.dart';
 
 import '../helpers/helper.dart';
-import '../utils/logger_service.dart';
-import '../utils/shared_preferences.dart';
-import '../utils/theme/theme.dart';
+import '../services/logger_service.dart';
+import '../services/shared_preferences.dart';
+import '../services/theme/theme.dart';
 import 'api_exceptions.dart';
 
 enum RequestType { get, post, delete, upload, download, put }

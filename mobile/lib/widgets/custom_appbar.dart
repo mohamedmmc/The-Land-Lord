@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:the_land_lord_website/utils/constants/sizes.dart';
 import 'package:flutter/material.dart';
-import 'package:the_land_lord_website/utils/theme/theme.dart';
+import 'package:the_land_lord_website/services/theme/theme.dart';
 import 'package:the_land_lord_website/views/properties/properties_screen.dart';
 import 'package:the_land_lord_website/widgets/custom_dropdown.dart';
 import 'package:the_land_lord_website/widgets/on_hover.dart';

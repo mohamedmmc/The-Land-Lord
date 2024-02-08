@@ -6,8 +6,8 @@ import '../models/property.dart';
 import '../utils/constants/colors.dart';
 import '../utils/constants/constants.dart';
 import '../utils/constants/sizes.dart';
-import '../utils/shared_preferences.dart';
-import '../utils/theme/theme.dart';
+import '../services/shared_preferences.dart';
+import '../services/theme/theme.dart';
 import '../views/property_detail/property_detail_screen.dart';
 import 'property_card.dart';
 

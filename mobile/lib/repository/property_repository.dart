@@ -33,11 +33,13 @@ class PropertyRepository extends GetxService {
     return (result['formattedList'] as List).map((e) => Property.fromJson(e)).toList();
   }
 
-  Future<PropertyDetailDTO> getDetailProperty({required String idProperty}) async {
-
+  Future<PropertyDetailsDTO> getDetailProperty({required String idProperty}) async {
     final result = await ApiBaseHelper().request(RequestType.get, '/property/$idProperty');
+    return PropertyDetailsDTO.fromJson(result);
+  }
 
-    return PropertyDetailDTO.fromJson(result);
-
+  Future<PropertyDetailsDTO> getPropertyCalendar({required String idProperty, required String location}) async {
+    final result = await ApiBaseHelper().request(RequestType.get, '/property/$idProperty/$location');
+    return PropertyDetailsDTO.fromJson(result);
   }
 }

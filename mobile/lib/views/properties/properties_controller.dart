@@ -10,7 +10,7 @@ import '../../helpers/helper.dart';
 import '../../models/property.dart';
 import '../../models/property_filter_model.dart';
 import '../../repository/property_repository.dart';
-import '../../utils/shared_preferences.dart';
+import '../../services/shared_preferences.dart';
 import '../property_detail/property_detail_screen.dart';
 
 class PropertiesController extends GetxController {
@@ -116,9 +116,10 @@ class PropertiesController extends GetxController {
     _getProperties().then((value) => Future.delayed(Durations.long1, () => Helper.blockRequest.value = false));
   }
 
-  void detailScreen(String id, LatLng coordinates) {
+  void detailScreen(String id, double price) {
     SharedPreferencesService.find.add('idProperty', id);
-    Get.toNamed(PropertyDetailScreen.routeName, arguments: {'id': id});
+    SharedPreferencesService.find.add('propertyPrice', price.toString());
+    Get.toNamed(PropertyDetailScreen.routeName, arguments: {'id': id, 'price': price});
   }
 
   Future<void> _getProperties() async {

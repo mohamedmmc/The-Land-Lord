@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
-import '../constants/colors.dart';
+import '../../utils/constants/colors.dart';
 
 enum MyThemeMode { light, dark }
 
