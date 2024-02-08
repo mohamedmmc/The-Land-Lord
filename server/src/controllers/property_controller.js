@@ -39,7 +39,7 @@ exports.getAvailable = async (req, res) => {
         property.name AS name,
         property.cleaning_price,
         (SELECT COUNT(*) FROM property_room WHERE room_id = 81 and property.id = property_room.property_id) AS wc_count,
-        SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT property_image.url ORDER BY property_image.id ASC SEPARATOR ','), ',', 3) AS image_urls,
+        SUBSTRING_INDEX(GROUP_CONCAT(DISTINCT property_image.thumbnail ORDER BY property_image.id ASC SEPARATOR ','), ',', 3) AS image_urls,
         description.house_rules,
         description.text,
         property.can_sleep_max,

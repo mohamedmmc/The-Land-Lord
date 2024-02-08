@@ -178,8 +178,11 @@ async function getDetailedProperties(propertyList) {
         );
 
         // Wait for all image processing promises to resolve
-        const mappedImageProp = await Promise.all(mappedImagePromises);
+        const mappedImagePropNullable = await Promise.all(mappedImagePromises);
 
+        const mappedImageProp = mappedImagePropNullable.filter(
+          (obj) => Object.keys(obj).length !== 0
+        );
         // data of table association paiment and property
         const mappedPaiementProperty =
           jsonResult.Pull_ListSpecProp_RS.Property[0].PaymentMethods?.[0]?.PaymentMethod?.map(
@@ -293,10 +296,12 @@ function resizeImageFromRentals(list, ID) {
   return list.map(async (image, index) => {
     const imageUrl = image["_"];
 
+    if (ID == 3347542) {
+      console.log("bouya");
+    }
+    // const adjustedName = adjustString(imageUrl);
     // Only process images matching the specified URL pattern
     const imageName = `${ID}_${index}.jpg`;
-
-    // Optional image download and saving logic (replace with your actual implementation):
     try {
       const founedProperty = await PropertyImage.findOne({
         where: {
@@ -320,7 +325,22 @@ function resizeImageFromRentals(list, ID) {
     };
   });
 }
+function adjustString(inputString) {
+  const jpgIndex = inputString.lastIndexOf(".jpg");
+  const jpegIndex = inputString.lastIndexOf(".jpeg");
+  const pngIndex = inputString.lastIndexOf(".png");
 
+  const index = Math.max(jpgIndex, jpegIndex, pngIndex);
+
+  if (index !== -1) {
+    if (index === jpgIndex || index === pngIndex) {
+      return inputString.substring(0, index + 4);
+    } else if (index === jpegIndex) {
+      return inputString.substring(0, index + 5);
+    }
+  }
+  return inputString;
+}
 module.exports = {
   addAuthentication,
   convertJsonToXml,

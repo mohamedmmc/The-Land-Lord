@@ -353,13 +353,13 @@ class ImageDTO {
 
   factory ImageDTO.fromJson(Map<String, dynamic> json) => ImageDTO(
         id: json["id"],
-        url: json["url"],
-        thumbnail: json["thumbnail"],
+        url:  ApiBaseHelper().getImageFromRentals(json["url"]),
+        thumbnail: ApiBaseHelper().getImageProperty(json["thumbnail"]),
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
-        "url": ApiBaseHelper().getImageProperty(url),
+        "url": ApiBaseHelper().getImageFromRentals(url),
         "thumbnail": ApiBaseHelper().getImageProperty(thumbnail),
       };
 }
