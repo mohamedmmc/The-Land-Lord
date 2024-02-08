@@ -57,7 +57,7 @@ class PropertyFilterController extends GetxController {
     update();
   }
 
-  PropertyFilterController() {
+  PropertyFilterController(this._filter) {
     _init();
   }
 
@@ -162,8 +162,13 @@ class PropertyFilterController extends GetxController {
                 _filter?.checkin = selection.value.startDate;
                 setCurrentStep(PropertyFilterSteps.checkout);
               } else {
-                _filter?.checkout = selection.value.endDate;
-                await Future.delayed(const Duration(milliseconds: 400));
+                if (selection.value.endDate == null && _filter?.checkin != selection.value.startDate) {
+                  // If user wants change end date the package restart selection from startDate
+                  _filter?.checkout = selection.value.startDate;
+                } else {
+                  _filter?.checkout = selection.value.endDate;
+                  await Future.delayed(const Duration(milliseconds: 400));
+                }
                 Get.back();
                 setCurrentStep(PropertyFilterSteps.guest);
               }
@@ -278,6 +283,7 @@ class PropertyFilterController extends GetxController {
             padding: const EdgeInsets.only(right: Paddings.regular),
             child: CustomButtons.icon(
               onPressed: () async {
+                print('checkin clear onPressed');
                 _filter?.checkin = null;
                 _filter?.checkout = null;
                 toggleOverlay();
@@ -295,11 +301,15 @@ class PropertyFilterController extends GetxController {
           return Padding(
             padding: const EdgeInsets.only(right: Paddings.regular),
             child: CustomButtons.icon(
-              onPressed: () {
+              onPressed: () async {
+                print('checkout clear onPressed');
                 _filter?.checkout = null;
+                toggleOverlay();
+                await Future.delayed(const Duration(milliseconds: 100));
+                setCurrentStep(PropertyFilterSteps.checkout);
                 update();
               },
-              icon: const Icon(Icons.clear, size: 14),
+              icon: const Icon(Icons.clear, size: 14, color: Colors.red),
             ),
           );
         }

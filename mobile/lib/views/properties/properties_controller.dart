@@ -11,6 +11,7 @@ import '../../models/property.dart';
 import '../../models/property_filter_model.dart';
 import '../../repository/property_repository.dart';
 import '../../services/shared_preferences.dart';
+import '../../utils/constants/constants.dart';
 import '../property_detail/property_detail_screen.dart';
 
 class PropertiesController extends GetxController {
@@ -48,10 +49,10 @@ class PropertiesController extends GetxController {
   }
 
   void updateFilter({PropertyFilterModel? filterModel}) => filter = PropertyFilterModel(
-        location: filterModel?.location ?? filter?.location,
-        checkin: filterModel?.checkin ?? filter?.checkin,
-        checkout: filterModel?.checkout ?? filter?.checkout,
-        guest: filterModel?.guest ?? filter?.guest,
+        location: filterModel?.location,
+        checkin: filterModel?.checkin,
+        checkout: filterModel?.checkout,
+        guest: filterModel?.guest,
         beds: filterModel?.beds,
         bathrooms: filterModel?.bathrooms,
         type: filterModel?.type,
@@ -126,7 +127,7 @@ class PropertiesController extends GetxController {
     PropertyRepository.find
         .getAllProperties(
       page: ++page,
-      limit: 8,
+      limit: kLoadMoreLimit,
       from: filter?.checkin != null ? DateFormat('yyyy-MM-dd').format(filter!.checkin!) : null,
       to: filter?.checkout != null ? DateFormat('yyyy-MM-dd').format(filter!.checkout!) : null,
       guest: filter?.guest.totalGuests == 1 ? null : filter?.guest.totalGuests,

@@ -12,7 +12,7 @@ class PropertyRepository extends GetxService {
 
   Future<List<Property>> getAllProperties({
     int page = 0,
-    int limit = 8,
+    int limit = kLoadMoreLimit,
     String? from,
     String? to,
     int? locationId,

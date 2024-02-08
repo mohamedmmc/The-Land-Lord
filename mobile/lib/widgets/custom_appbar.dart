@@ -23,7 +23,10 @@ class CustomAppBar extends StatelessWidget {
             decoration: const BoxDecoration(color: kNeutralColor100),
             child: Row(
               children: [
-                Image.asset('assets/images/logo_thelandlord.png', height: 50),
+                InkWell(
+                  onTap: () => Get.offAllNamed(PropertiesScreen.routeName),
+                  child: Image.asset('assets/images/logo_thelandlord.png', height: 50),
+                ),
                 const Spacer(),
                 ...List.generate(
                   screens.length,

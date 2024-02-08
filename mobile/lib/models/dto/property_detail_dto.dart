@@ -145,37 +145,6 @@ class MappedProperty {
     return model;
   }
 
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "last_modified": lastModified.toIso8601String(),
-        "date_created": "${dateCreated.year.toString().padLeft(4, '0')}-${dateCreated.month.toString().padLeft(2, '0')}-${dateCreated.day.toString().padLeft(2, '0')}",
-        "cleaning_price": cleaningPrice,
-        "space": space,
-        "standard_guests": standardGuests,
-        "can_sleep_max": canSleepMax,
-        "type_property_id": typePropertyId,
-        "objectType_id": objectTypeId,
-        "floor": floor,
-        "street": street,
-        "zip_code": zipCode,
-        "coordinates": coordinates.toJson(),
-        "check_in_out": checkInOut.toJson(),
-        "preparation_time_before_arrival": preparationTimeBeforeArrival,
-        "preparation_time_before_arrival_in_hours": preparationTimeBeforeArrivalInHours,
-        "is_active": isActive,
-        "is_archived": isArchived,
-        "houseRules": List<dynamic>.from(houseRules.map((x) => x.toJson())),
-        "description": List<dynamic>.from(description.map((x) => x.toJson())),
-        "cancellation_policies": List<dynamic>.from(cancellationPolicies.map((x) => x.toJson())),
-        "location": location.toJson(),
-        "amenity": List<dynamic>.from(amenity.map((x) => x.toJson())),
-        "paiement": List<dynamic>.from(paiement.map((x) => x.toJson())),
-        "room": List<dynamic>.from(room.map((x) => x.toJson())),
-        "images": List<dynamic>.from(images.map((x) => x.toJson())),
-        "deposit": List<dynamic>.from(deposit.map((x) => x.toJson())),
-      };
-
   String getPropertySizeOverview() =>
       '$standardGuests guests • ${room.singleWhere((element) => element.id == 257).count} bedrooms • $canSleepMax beds • ${room.singleWhere((element) => element.id == 81).count} baths';
 
@@ -198,12 +167,6 @@ class Amenity {
         name: json["name"],
         count: json["count"],
       );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "count": count,
-      };
 }
 
 class CancellationPolicy {
@@ -222,12 +185,6 @@ class CancellationPolicy {
         validFrom: json["validFrom"],
         validTo: json["validTo"],
       );
-
-  Map<String, dynamic> toJson() => {
-        "value": value,
-        "validFrom": validFrom,
-        "validTo": validTo,
-      };
 }
 
 class CheckInOut {
@@ -249,13 +206,6 @@ class CheckInOut {
         checkOutUntil: List<String>.from(json["CheckOutUntil"].map((x) => x)),
         place: List<String>.from(json["Place"].map((x) => x)),
       );
-
-  Map<String, dynamic> toJson() => {
-        "CheckInFrom": List<dynamic>.from(checkInFrom.map((x) => x)),
-        "CheckInTo": List<dynamic>.from(checkInTo.map((x) => x)),
-        "CheckOutUntil": List<dynamic>.from(checkOutUntil.map((x) => x)),
-        "Place": List<dynamic>.from(place.map((x) => x)),
-      };
 }
 
 class Coordinates {
@@ -271,11 +221,6 @@ class Coordinates {
         latitude: List<String>.from(json["Latitude"].map((x) => x)),
         longitude: List<String>.from(json["Longitude"].map((x) => x)),
       );
-
-  Map<String, dynamic> toJson() => {
-        "Latitude": List<dynamic>.from(latitude.map((x) => x)),
-        "Longitude": List<dynamic>.from(longitude.map((x) => x)),
-      };
 
   LatLng toLatLng() => LatLng(double.parse(latitude.first), double.parse(longitude.first));
 }
@@ -296,12 +241,6 @@ class Deposit {
         name: json["name"],
         value: json["value"],
       );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-        "value": value,
-      };
 }
 
 class Description {
@@ -317,11 +256,6 @@ class Description {
         languageId: json["language_id"],
         text: json["text"],
       );
-
-  Map<String, dynamic> toJson() => {
-        "language_id": languageId,
-        "text": text,
-      };
 }
 
 class HouseRule {
@@ -334,10 +268,6 @@ class HouseRule {
   factory HouseRule.fromJson(Map<String, dynamic> json) => HouseRule(
         houseRules: json["house_rules"],
       );
-
-  Map<String, dynamic> toJson() => {
-        "house_rules": houseRules,
-      };
 }
 
 class ImageDTO {
@@ -353,15 +283,9 @@ class ImageDTO {
 
   factory ImageDTO.fromJson(Map<String, dynamic> json) => ImageDTO(
         id: json["id"],
-        url:  ApiBaseHelper().getImageFromRentals(json["url"]),
+        url: ApiBaseHelper().getImageFromRentals(json["url"]),
         thumbnail: ApiBaseHelper().getImageProperty(json["thumbnail"]),
       );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "url": ApiBaseHelper().getImageFromRentals(url),
-        "thumbnail": ApiBaseHelper().getImageProperty(thumbnail),
-      };
 }
 
 class Location {
@@ -377,9 +301,4 @@ class Location {
         id: json["id"],
         name: json["name"],
       );
-
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "name": name,
-      };
 }

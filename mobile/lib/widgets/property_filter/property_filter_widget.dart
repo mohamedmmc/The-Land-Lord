@@ -19,6 +19,7 @@ class PropertyFilterWidget extends StatelessWidget {
   final Widget propertiesList;
   final void Function()? closeOverlay;
   final BoxConstraints constraints;
+  final PropertyFilterModel? currentFilter;
   final void Function(PropertyFilterModel) updateFilter;
   final bool? toggleExpandFilter;
   final ScrollController scrollController;
@@ -31,6 +32,7 @@ class PropertyFilterWidget extends StatelessWidget {
     this.closeOverlay,
     required this.constraints,
     required this.updateFilter,
+    required this.currentFilter,
   });
 
   @override
@@ -38,12 +40,15 @@ class PropertyFilterWidget extends StatelessWidget {
     bool isMobile = GetPlatform.isAndroid || GetPlatform.isIOS || GetPlatform.isMobile;
     final textTheme = Theme.of(context).textTheme;
     return GetBuilder<PropertyFilterController>(
+      autoRemove: false,
+      init: PropertyFilterController(currentFilter),
       didChangeDependencies: (state) => state.controller?.updateFilter ??= updateFilter,
       didUpdateWidget: (oldWidget, state) => WidgetsBinding.instance.addPostFrameCallback((timeStamp) => state.controller?.isExpanded = !(toggleExpandFilter ?? false)),
       builder: (controller) => SizedBox(
         width: constraints.maxWidth,
         child: Stack(
           children: [
+            if (controller.isDropdownOpen) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile))),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -191,42 +196,52 @@ class PropertyFilterWidget extends StatelessWidget {
                     )
                   ],
                 ),
-                const SizedBox(height: Paddings.large),
                 Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(right: Paddings.regular),
-                    controller: scrollController,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: Paddings.exceptional * 1.5, vertical: Paddings.regular),
-                          child: Text(
-                            "Découvrez notre sélection pour vos vacances",
-                            style: TextStyle(
-                              fontSize: 26.0,
-                              height: 1.5,
-                              color: Color.fromRGBO(33, 45, 82, 1),
-                              fontWeight: FontWeight.w600,
+                  child: Stack(
+                    children: [
+                      Column(
+                        children: [
+                          const SizedBox(height: Paddings.large),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.only(right: Paddings.regular),
+                              controller: scrollController,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: Paddings.exceptional * 1.5, vertical: Paddings.regular),
+                                    child: Text(
+                                      "Découvrez notre sélection pour vos vacances",
+                                      style: TextStyle(
+                                        fontSize: 26.0,
+                                        height: 1.5,
+                                        color: Color.fromRGBO(33, 45, 82, 1),
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  propertiesList,
+                                  Obx(
+                                    () => Helper.isLoading.value
+                                        ? Padding(
+                                            padding: const EdgeInsets.symmetric(vertical: Paddings.large, horizontal: Paddings.exceptional * 1.5),
+                                            child: Center(child: Lottie.asset(Assets.fetchingData, height: 100)),
+                                          )
+                                        : const SizedBox(),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        propertiesList,
-                        Obx(
-                          () => Helper.isLoading.value
-                              ? Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: Paddings.large, horizontal: Paddings.exceptional * 1.5),
-                                  child: Center(child: Lottie.asset(Assets.fetchingData, height: 100)),
-                                )
-                              : const SizedBox(),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                      if (controller.isDropdownOpen) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile))),
+                    ],
                   ),
                 ),
               ],
             ),
-            if (controller.isDropdownOpen) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile))),
             if (controller.isDropdownOpen) Positioned(child: controller.filterOverlayWidget(maxWidth: constraints.maxWidth)),
           ],
         ),

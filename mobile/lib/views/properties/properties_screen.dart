@@ -2,8 +2,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart' as lottie;
-import 'package:flutter_map_cancellable_tile_provider/flutter_map_cancellable_tile_provider.dart';
 
+import '../../helpers/buildables.dart';
 import '../../helpers/helper.dart';
 import '../../models/property_filter_model.dart';
 import '../../utils/constants/assets.dart';
@@ -11,7 +11,6 @@ import '../../utils/constants/colors.dart';
 import '../../utils/constants/constants.dart';
 import '../../utils/constants/sizes.dart';
 import '../../services/theme/theme.dart';
-import '../../widgets/custom_appbar.dart';
 import '../../widgets/custom_marker.dart';
 import '../../widgets/property_card.dart';
 import '../../widgets/property_filter/property_filter_widget.dart';
@@ -26,15 +25,11 @@ class PropertiesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: kNeutralColor100,
-        surfaceTintColor: kNeutralColor100,
-        toolbarHeight: 80,
-        flexibleSpace: const Center(child: CustomAppBar()),
-      ),
+      appBar: Buildables.customAppBar(),
       // TODO Use for mobile device
       // bottomNavigationBar: AppBottomNavigation(),
       body: GetBuilder<PropertiesController>(
+        init: PropertiesController(),
         initState: (state) => state.controller?.filter = filter ?? PropertyFilterModel(),
         builder: (controller) => DecoratedBox(
           decoration: BoxDecoration(border: Border(top: BorderSide(color: kNeutralLightColor, width: 0.5))),
@@ -56,12 +51,10 @@ class PropertiesScreen extends StatelessWidget {
                                 const SizedBox(height: Paddings.large),
                                 Expanded(
                                   child: PropertyFilterWidget(
+                                    currentFilter: controller.filter,
                                     scrollController: controller.scrollController,
                                     toggleExpandFilter: controller.isFilterExpanded,
-                                    updateFilter: (filter) {
-                                      if (filter.location == null && controller.filter?.location != null) controller.filter?.location = null;
-                                      controller.updateFilter(filterModel: filter);
-                                    },
+                                    updateFilter: (filter) => controller.updateFilter(filterModel: filter),
                                     constraints: constraints,
                                     propertiesList: Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: Paddings.extraLarge * 2, vertical: Paddings.regular),
@@ -78,7 +71,7 @@ class PropertiesScreen extends StatelessWidget {
                                           : Column(
                                               crossAxisAlignment: CrossAxisAlignment.end,
                                               children: [
-                                                Text('${controller.filteredProperties.length} results found', style: AppFonts.x12Regular),
+                                                // Text('${controller.filteredProperties.length} results found', style: AppFonts.x12Regular),
                                                 const SizedBox(height: Paddings.regular),
                                                 Wrap(
                                                   runSpacing: 20,
@@ -117,10 +110,7 @@ class PropertiesScreen extends StatelessWidget {
                                 },
                               ),
                               children: [
-                                TileLayer(
-                                  urlTemplate: 'https://basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}.png',
-                                  tileProvider: CancellableNetworkTileProvider(),
-                                ),
+                                Buildables.mapTileLayer(),
                                 MarkerLayer(
                                   markers: List.generate(
                                     controller.filteredProperties.where((element) => element.coordinates != null).length,

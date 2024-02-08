@@ -1,17 +1,18 @@
 import 'package:flutter/gestures.dart';
-import 'package:the_land_lord_website/repository/location_repository.dart';
-import 'package:the_land_lord_website/repository/property_repository.dart';
-import 'package:the_land_lord_website/views/properties/properties_screen.dart';
-import 'package:the_land_lord_website/views/property_detail/property_detail_screen.dart';
-import 'package:the_land_lord_website/views/property_detail/property_detail_controller.dart';
-import 'package:the_land_lord_website/widgets/property_filter/property_filter_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:the_land_lord_website/helpers/helper.dart';
 
+import 'repository/location_repository.dart';
+import 'repository/property_repository.dart';
 import 'services/main_app_service.dart';
 import 'services/logger_service.dart';
 import 'services/shared_preferences.dart';
 import 'views/properties/properties_controller.dart';
+import 'views/properties/properties_screen.dart';
+import 'views/property_detail/components/all_photos_screen.dart';
+import 'views/property_detail/property_detail_controller.dart';
+import 'views/property_detail/property_detail_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -50,9 +51,21 @@ class MyApp extends StatelessWidget {
         ),
         GetPage(
           name: PropertyDetailScreen.routeName,
-          page: () =>  const PropertyDetailScreen(),
+          page: () => const PropertyDetailScreen(),
           binding: BindingsBuilder.put(() => PropertyDetailController()),
-
+        ),
+        GetPage(
+          name: AllPhotoScreen.routeName,
+          page: () {
+            if (Get.arguments?['images'] == null) {
+              Helper.waitAndExecute(() => SharedPreferencesService.find.isReady, () {
+                final idProperty = SharedPreferencesService.find.get('idProperty');
+                WidgetsBinding.instance.addPostFrameCallback((_) => Get.toNamed(PropertyDetailScreen.routeName, arguments: {'idProperty': idProperty}));
+              });
+              return const PropertiesScreen();
+            }
+            return AllPhotoScreen(images: Get.arguments['images']);
+          },
         ),
         // GetPage(
         //   name: BookingDetailsScreen.routeName,
@@ -84,7 +97,6 @@ class InitialBindings implements Bindings {
     Get.put(LocationRepository(), permanent: true);
     Get.put(PropertyRepository(), permanent: true);
     Get.put<MainAppServie>(MainAppServie(), permanent: true);
-    Get.lazyPut(() => PropertyFilterController());
   }
 }
 

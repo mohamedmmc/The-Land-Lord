@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:the_land_lord_website/helpers/helper.dart';
 import 'package:the_land_lord_website/repository/property_repository.dart';
 import 'package:the_land_lord_website/services/shared_preferences.dart';
@@ -16,6 +17,7 @@ class PropertyDetailController extends GetxController {
   DateTimeRange _selectedDuration = DateTimeRange(start: DateTime.now(), end: DateTime.now().add(const Duration(days: 3)));
   double galleryAdditionalHeight = 0;
   double? estimatedPrice;
+  LatLng? propertyCoordinates;
 
   DateTimeRange get selectedDuration => _selectedDuration;
 
@@ -35,6 +37,7 @@ class PropertyDetailController extends GetxController {
       estimatedPrice = double.parse(estimatedPrice!.toStringAsFixed(2));
       if (idProperty != null) {
         propertyDetailsDTO = await PropertyRepository.find.getDetailProperty(idProperty: idProperty!);
+        propertyCoordinates = propertyDetailsDTO?.mappedProperties?.coordinates.toLatLng();
         Helper.waitAndExecute(
           () => propertyDetailsDTO?.mappedProperties != null,
           () => PropertyRepository.find.getPropertyCalendar(idProperty: idProperty!, location: propertyDetailsDTO!.mappedProperties!.location.id).then((value) {

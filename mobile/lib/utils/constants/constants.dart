@@ -19,3 +19,5 @@ const laMarsaGrp = {
 
 double minPriceRange = 20;
 double maxPriceRange = 2200;
+
+const int kLoadMoreLimit = 9;
