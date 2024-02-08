@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:mime/mime.dart';
@@ -16,8 +17,8 @@ import 'api_exceptions.dart';
 enum RequestType { get, post, delete, upload, download, put }
 
 // const String baseUrl = '10.0.2.2';
- const String baseUrl = '192.168.1.15';
-// const String baseUrl = 'localhost';
+// const String baseUrl = '192.168.1.15';
+const String baseUrl = 'localhost';
 
 class ApiBaseHelper {
   final String _baseUrl = 'http://$baseUrl:3000';
@@ -27,7 +28,7 @@ class ApiBaseHelper {
   Future<dynamic> request(RequestType requestType, String url, {Map<String, String>? headers, dynamic body, File? file, bool sendToken = false}) async {
     assert(requestType == RequestType.upload && file != null || requestType != RequestType.upload, 'Please ensure to incule the file to upload!');
     late http.Response response;
-    Helper.isLoading.value = true;
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) => Helper.isLoading.value = true);
     final String? token = sendToken ? getToken() : null;
     final requestUrl = Uri.parse('$_baseUrl/api$url');
     switch (requestType) {
@@ -84,6 +85,8 @@ class ApiBaseHelper {
   }
 
   String getImageProperty(String pictureName) => 'http://localhost:8080/$_baseUrl/public/properties/$pictureName';
+  
+  String getImageFromRentals(String pictureName) => 'http://localhost:8080/$pictureName';
 }
 
 dynamic _returnResponse(http.Response response) {
