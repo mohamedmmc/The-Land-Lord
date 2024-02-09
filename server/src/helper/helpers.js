@@ -6,6 +6,7 @@ const path = require("path");
 const { log } = require("console");
 const { PropertyImage } = require("../models/property_image_model");
 const { Property } = require("../models/property_model");
+const cloudinary = require("../middlewares/cloudinary");
 function addAuthentication(body, targetProperty) {
   const targetObject = body[targetProperty];
 
