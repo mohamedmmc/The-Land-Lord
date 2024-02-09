@@ -94,12 +94,18 @@ exports.getAvailable = async (req, res) => {
             ? "AND location.id IN (63298, 63299,25348)"
             : "AND property.location_id = :location"
         }
-        ${!guest ? "" : "AND property.standard_guests = :guest"}
+        ${
+          !guest
+            ? ""
+            : guest == 5
+            ? "AND property.standard_guests >= :guest"
+            : "AND property.standard_guests = :guest"
+        }
         ${
           !room
             ? ""
             : room == 5
-            ? "AND property.can_sleep_max => :room"
+            ? "AND property.can_sleep_max >= :room"
             : "AND property.can_sleep_max = :room"
         }
         ${!priceMax ? "" : "AND property_price.price * :devise <= :priceMax"}
@@ -160,7 +166,7 @@ exports.getAvailable = async (req, res) => {
       }));
     return res.status(200).json({ formattedList });
   } catch (error) {
-    return res.status(500).json({ message: error });
+    return res.status(500).json({ message: a });
   }
 };
 
