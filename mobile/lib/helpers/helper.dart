@@ -11,13 +11,14 @@ import '../utils/constants/colors.dart';
 import '../utils/constants/sizes.dart';
 import '../services/logger_service.dart';
 import '../services/theme/theme.dart';
+import '../views/properties/properties_screen.dart';
 
 class Helper {
   static Timer? _searchOnStoppedTyping;
 
   static RxBool blockRequest = false.obs;
-  static RxBool isLoading = true.obs;
-  
+  static RxBool isLoading = false.obs;
+
   static void snackBar({String message = 'Snack bar test', String? title, Duration? duration, bool includeDismiss = true, Widget? overrideButton, TextStyle? styleMessage}) =>
       GetSnackBar(
         titleText: title != null ? Text(title, style: styleMessage ?? AppFonts.x14Bold.copyWith(color: kNeutralColor100)) : null,
@@ -154,5 +155,21 @@ class Helper {
   static int getDurationInRange(DateTimeRange range) {
     if (range.start.isAfter(range.end)) throw ArgumentError('From date cannot be after to date');
     return range.end.difference(range.start).inDays;
+  }
+
+  static bool isCurrentRoute(int index) {
+    switch (index) {
+      case 0:
+        break;
+      case 1:
+        return Get.currentRoute == PropertiesScreen.routeName;
+      case 2:
+        break;
+      case 3:
+        break;
+      case 4:
+        break;
+    }
+    return false;
   }
 }

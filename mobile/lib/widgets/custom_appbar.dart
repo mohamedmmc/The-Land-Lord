@@ -6,6 +6,7 @@ import 'package:the_land_lord_website/views/properties/properties_screen.dart';
 import 'package:the_land_lord_website/widgets/custom_dropdown.dart';
 import 'package:the_land_lord_website/widgets/on_hover.dart';
 
+import '../helpers/helper.dart';
 import '../utils/constants/colors.dart';
 
 final List<String> screens = ['Accueil', 'Logements', 'Services', 'A Propos', 'Contact'];
@@ -33,7 +34,7 @@ class CustomAppBar extends StatelessWidget {
                   (index) => OnHover(
                     builder: (isHovered) => Padding(
                       padding: EdgeInsets.only(right: index < screens.length - 1 ? Paddings.exceptional * 2 : 0),
-                      child: Text(screens[index], style: AppFonts.x16Regular.copyWith(fontWeight: isCurrentRoute(index) || isHovered ? FontWeight.bold : null)),
+                      child: Text(screens[index], style: AppFonts.x16Regular.copyWith(fontWeight: Helper.isCurrentRoute(index) || isHovered ? FontWeight.bold : null)),
                     ),
                   ),
                 ),
@@ -56,21 +57,5 @@ class CustomAppBar extends StatelessWidget {
         ),
       ],
     );
-  }
-
-  bool isCurrentRoute(int index) {
-    switch (index) {
-      case 0:
-        break;
-      case 1:
-        return Get.currentRoute == PropertiesScreen.routeName;
-      case 2:
-        break;
-      case 3:
-        break;
-      case 4:
-        break;
-    }
-    return false;
   }
 }

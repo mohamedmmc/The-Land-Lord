@@ -428,7 +428,7 @@ class PropertyDetailScreen extends StatelessWidget {
   Widget _buildAmenity(Amenity amenity) {
     IconData getIconForAmenity(String amenityName) {
       if (amenitiesIconMap[amenityName] != null) return amenitiesIconMap[amenityName]!;
-      debugPrint('$amenityName\n');
+      debugPrint('$amenityName (not found)');
       return Icons.help_outline;
     }
 

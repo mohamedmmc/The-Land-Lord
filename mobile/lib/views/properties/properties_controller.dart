@@ -45,7 +45,7 @@ class PropertiesController extends GetxController {
       isFilterExpanded = scrollController.position.pixels >= 50;
       if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 50) _loadMore();
     });
-    Helper.waitAndExecute(() => !Helper.isLoading.value, () => _getProperties());
+    Helper.waitAndExecute(() => !Helper.isLoading.value, () => page == 0 ? _getProperties() : {});
   }
 
   void updateFilter({PropertyFilterModel? filterModel}) => filter = PropertyFilterModel(

@@ -47,7 +47,6 @@ class MyApp extends StatelessWidget {
         GetPage(
           name: PropertiesScreen.routeName,
           page: () => const PropertiesScreen(),
-          binding: BindingsBuilder.put(() => PropertiesController()),
         ),
         GetPage(
           name: PropertyDetailScreen.routeName,
@@ -97,6 +96,7 @@ class InitialBindings implements Bindings {
     Get.put(LocationRepository(), permanent: true);
     Get.put(PropertyRepository(), permanent: true);
     Get.put<MainAppServie>(MainAppServie(), permanent: true);
+    Get.put<PropertiesController>(PropertiesController(), permanent: true);
   }
 }
 

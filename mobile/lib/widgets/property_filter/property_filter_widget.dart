@@ -63,7 +63,7 @@ class PropertyFilterWidget extends StatelessWidget {
                         child: GestureDetector(
                           onTap: () => controller.manageFilter(isMobile),
                           child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: controller.isExpanded ? filterMargin : 150),
+                            margin: EdgeInsets.symmetric(horizontal: controller.isExpanded ? filterMargin : filterMargin + 50),
                             padding: controller.isExpanded ? null : const EdgeInsets.symmetric(horizontal: Paddings.large, vertical: Paddings.regular),
                             height: controller.isExpanded ? 65 : 61,
                             width: filterWidth,
