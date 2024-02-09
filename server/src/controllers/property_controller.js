@@ -150,27 +150,28 @@ exports.getAvailable = async (req, res) => {
     const formattedList = locationList
       .filter((row) => row.price != null)
       .map((row) => {
-        // Parse coordinates string to JSON
-        let coordinatesObj;
-        try {
-          coordinatesObj = JSON.parse(row.coordinates);
-        } catch (error) {
-          console.error("Error parsing coordinates JSON:", error);
-          // Handle the error, e.g., provide default coordinates or log the error
+        let coordinatesObj = {};
+
+        if (typeof row.coordinates === "string") {
+          try {
+            coordinatesObj = JSON.parse(row.coordinates);
+          } catch (error) {
+            console.error("Error parsing coordinates JSON:", error);
+          }
+        } else if (typeof row.coordinates === "object") {
+          coordinatesObj = row.coordinates;
         }
-        // Convert latitude and longitude values to numbers
-        const latitude = coordinatesObj.Latitude[0];
-        const longitude = coordinatesObj.Longitude[0];
-        // Assign the converted values back to the coordinates object
-        coordinatesObj.Latitude[0] = latitude;
-        coordinatesObj.Longitude[0] = longitude;
+
+        // Extract latitude and longitude
+        const latitude = coordinatesObj.Latitude?.[0] || 0;
+        const longitude = coordinatesObj.Longitude?.[0] || 0;
 
         return {
           id: row.id,
           name: row.name,
           price: String(parseInt(row.price) * devise),
           location: row.location,
-          coordinates: coordinatesObj, // Assign back the modified coordinates object
+          coordinates: { latitude, longitude }, // Construct coordinates object
           images: row.image_urls.split(","),
           houseRules: row.house_rules,
           description: row.text,
@@ -182,7 +183,6 @@ exports.getAvailable = async (req, res) => {
 
     return res.status(200).json({ formattedList });
   } catch (error) {
-    console.log("erreur getting all properties");
     console.log(error);
     return res.status(500).json({ message: error });
   }
