@@ -176,6 +176,8 @@ exports.getAvailable = async (req, res) => {
 
     return res.status(200).json({ formattedList });
   } catch (error) {
+    console.log("erreur getting all properties");
+    console.log(error);
     return res.status(500).json({ message: error });
   }
 };
