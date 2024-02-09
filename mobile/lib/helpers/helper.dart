@@ -17,7 +17,7 @@ class Helper {
 
   static RxBool blockRequest = false.obs;
   static RxBool isLoading = true.obs;
-
+  
   static void snackBar({String message = 'Snack bar test', String? title, Duration? duration, bool includeDismiss = true, Widget? overrideButton, TextStyle? styleMessage}) =>
       GetSnackBar(
         titleText: title != null ? Text(title, style: styleMessage ?? AppFonts.x14Bold.copyWith(color: kNeutralColor100)) : null,

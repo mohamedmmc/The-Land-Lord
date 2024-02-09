@@ -44,208 +44,215 @@ class PropertyFilterWidget extends StatelessWidget {
       init: PropertyFilterController(currentFilter),
       didChangeDependencies: (state) => state.controller?.updateFilter ??= updateFilter,
       didUpdateWidget: (oldWidget, state) => WidgetsBinding.instance.addPostFrameCallback((timeStamp) => state.controller?.isExpanded = !(toggleExpandFilter ?? false)),
-      builder: (controller) => SizedBox(
-        width: constraints.maxWidth,
-        child: Stack(
-          children: [
-            if (controller.isDropdownOpen) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile))),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ConstrainedBox(
-                      constraints: BoxConstraints(maxWidth: controller.isExpanded ? constraints.maxWidth - 150 : constraints.maxWidth - 100, minWidth: 300),
-                      child: GestureDetector(
-                        onTap: () => controller.manageFilter(isMobile),
-                        child: Container(
-                          margin: EdgeInsets.symmetric(horizontal: controller.isExpanded ? 60 : 150),
-                          padding: controller.isExpanded ? null : const EdgeInsets.symmetric(horizontal: Paddings.large, vertical: Paddings.regular),
-                          height: controller.isExpanded ? 65 : 61,
-                          width: constraints.maxWidth,
-                          decoration: BoxDecoration(
-                            color: kNeutralColor100,
-                            border: lightBorder,
-                            borderRadius: circularRadius,
-                            // boxShadow: [
-                            //   BoxShadow(
-                            //     color: kNeutralLightColor.withOpacity(0.5),
-                            //     blurRadius: 1,
-                            //     spreadRadius: 1,
-                            //     offset: const Offset(0.0, 2.0),
-                            //   ),
-                            // ],
-                          ),
-                          child: controller.isExpanded
-                              ? CompositedTransformTarget(
-                                  link: controller.layerLink,
-                                  child: Row(
-                                    children: List.generate(
-                                      PropertyFilterSteps.values.length,
-                                      (index) {
-                                        final step = PropertyFilterSteps.values[index];
-                                        return controller.currentStep == step && controller.isDropdownOpen
-                                            ? Expanded(
-                                                flex: 3,
-                                                child: DecoratedBox(
-                                                  decoration: BoxDecoration(color: kNeutralLightColor, borderRadius: circularRadius),
-                                                  child: Row(
-                                                    children: [
-                                                      Expanded(
-                                                        flex: 4,
-                                                        child: Center(
-                                                          child: ListTile(
-                                                            contentPadding: const EdgeInsets.only(left: Paddings.exceptional),
-                                                            title: Text(step.value),
-                                                            titleTextStyle: textTheme.bodyMedium!
-                                                                .copyWith(fontWeight: FontWeight.bold, color: controller.isExpanded ? kBlackColor : kNeutralColor100),
-                                                            subtitle: controller.resolveStepSubtitle(step),
-                                                            subtitleTextStyle: textTheme.bodySmall!.copyWith(color: controller.isExpanded ? kBlackColor : kNeutralColor100),
-                                                            trailing: controller.resolveClearFilterTrailing(step),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      if (index == PropertyFilterSteps.values.length - 1)
-                                                        Padding(
-                                                          padding: const EdgeInsets.only(right: Paddings.regular),
-                                                          child: CustomButtons.icon(
-                                                            padding: const EdgeInsets.all(Paddings.small),
-                                                            onPressed: () => controller.manageFilter(isMobile),
-                                                            child: Icon(Icons.search, color: controller.isDropdownOpen ? kNeutralColor100 : kBlackColor),
-                                                          ),
-                                                        ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              )
-                                            : Expanded(
-                                                flex: index == 0 || index == PropertyFilterSteps.values.length - 1 ? 3 : 2,
-                                                child: OnHover(
-                                                  builder: (isHovered) => DecoratedBox(
-                                                    decoration: BoxDecoration(
-                                                      color: isHovered
-                                                          ? kNeutralLightColor.withAlpha(150)
-                                                          : controller.currentStep == step && controller.isDropdownOpen
-                                                              ? kNeutralLightColor
-                                                              : kNeutralColor100,
-                                                      borderRadius: circularRadius,
-                                                    ),
+      builder: (controller) {
+        final double filterWidth = constraints.maxWidth > 650 ? 650 + constraints.maxWidth * 0.05 : 650;
+        final double filterMargin = constraints.maxWidth <= filterWidth ? 0 : (constraints.maxWidth - filterWidth) / 2;
+        return SizedBox(
+          width: constraints.maxWidth,
+          child: Stack(
+            children: [
+              if (controller.isDropdownOpen) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile))),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: controller.isExpanded ? constraints.maxWidth - 150 : constraints.maxWidth - 100, minWidth: 300),
+                        child: GestureDetector(
+                          onTap: () => controller.manageFilter(isMobile),
+                          child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: controller.isExpanded ? filterMargin : 150),
+                            padding: controller.isExpanded ? null : const EdgeInsets.symmetric(horizontal: Paddings.large, vertical: Paddings.regular),
+                            height: controller.isExpanded ? 65 : 61,
+                            width: filterWidth,
+                            decoration: BoxDecoration(
+                              color: kNeutralColor100,
+                              border: lightBorder,
+                              borderRadius: circularRadius,
+                              // boxShadow: [
+                              //   BoxShadow(
+                              //     color: kNeutralLightColor.withOpacity(0.5),
+                              //     blurRadius: 1,
+                              //     spreadRadius: 1,
+                              //     offset: const Offset(0.0, 2.0),
+                              //   ),
+                              // ],
+                            ),
+                            child: controller.isExpanded
+                                ? CompositedTransformTarget(
+                                    link: controller.layerLink,
+                                    child: Row(
+                                      children: List.generate(
+                                        PropertyFilterSteps.values.length,
+                                        (index) {
+                                          final step = PropertyFilterSteps.values[index];
+                                          var isBigger = index == 0 || index == PropertyFilterSteps.values.length - 1;
+                                          return controller.currentStep == step && controller.isDropdownOpen
+                                              ? Expanded(
+                                                  flex: 3,
+                                                  child: DecoratedBox(
+                                                    decoration: BoxDecoration(color: kNeutralLightColor, borderRadius: circularRadius),
                                                     child: Row(
                                                       children: [
                                                         Expanded(
-                                                          flex: 2,
-                                                          child: InkWell(
-                                                            onTap: () => controller.setCurrentStep(step),
-                                                            child: Center(
-                                                              child: ListTile(
-                                                                contentPadding: const EdgeInsets.only(left: Paddings.exceptional),
-                                                                title: Text(step.value),
-                                                                titleTextStyle: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
-                                                                subtitle: controller.resolveStepSubtitle(step),
-                                                                subtitleTextStyle: textTheme.bodySmall!.copyWith(color: kNeutralColor),
-                                                              ),
+                                                          flex: 4,
+                                                          child: Center(
+                                                            child: ListTile(
+                                                              contentPadding: EdgeInsets.only(left: isBigger ? Paddings.exceptional : Paddings.large),
+                                                              title: FittedBox(fit: BoxFit.scaleDown, child: Text(step.value)),
+                                                              titleTextStyle: textTheme.bodyMedium!
+                                                                  .copyWith(fontWeight: FontWeight.bold, color: controller.isExpanded ? kBlackColor : kNeutralColor100),
+                                                              subtitle: FittedBox(fit: BoxFit.scaleDown, child: controller.resolveStepSubtitle(step)),
+                                                              subtitleTextStyle: textTheme.bodySmall!.copyWith(color: controller.isExpanded ? kBlackColor : kNeutralColor100),
+                                                              trailing: controller.resolveClearFilterTrailing(step),
                                                             ),
                                                           ),
                                                         ),
                                                         if (index == PropertyFilterSteps.values.length - 1)
-                                                          Expanded(
+                                                          Padding(
+                                                            padding: const EdgeInsets.only(right: Paddings.regular),
                                                             child: CustomButtons.icon(
+                                                              padding: const EdgeInsets.all(Paddings.small),
                                                               onPressed: () => controller.manageFilter(isMobile),
-                                                              child: const Icon(Icons.search, color: kBlackColor),
+                                                              child: Icon(Icons.search, color: controller.isDropdownOpen ? kNeutralColor100 : kBlackColor),
                                                             ),
                                                           ),
                                                       ],
                                                     ),
                                                   ),
-                                                ),
-                                              );
-                                      },
+                                                )
+                                              : Expanded(
+                                                  flex: isBigger ? 3 : 2,
+                                                  child: OnHover(
+                                                    builder: (isHovered) => DecoratedBox(
+                                                      decoration: BoxDecoration(
+                                                        color: isHovered
+                                                            ? kNeutralLightColor.withAlpha(150)
+                                                            : controller.currentStep == step && controller.isDropdownOpen
+                                                                ? kNeutralLightColor
+                                                                : kNeutralColor100,
+                                                        borderRadius: circularRadius,
+                                                      ),
+                                                      child: Row(
+                                                        children: [
+                                                          Expanded(
+                                                            flex: 2,
+                                                            child: InkWell(
+                                                              onTap: () => controller.setCurrentStep(step),
+                                                              child: Center(
+                                                                child: ListTile(
+                                                                  contentPadding: EdgeInsets.only(left: isBigger ? Paddings.exceptional : Paddings.large),
+                                                                  title: FittedBox(fit: BoxFit.scaleDown, child: Text(step.value)),
+                                                                  titleTextStyle: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold),
+                                                                  subtitle: FittedBox(fit: BoxFit.scaleDown, child: controller.resolveStepSubtitle(step)),
+                                                                  subtitleTextStyle: textTheme.bodySmall!.copyWith(color: kNeutralColor),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          if (index == PropertyFilterSteps.values.length - 1)
+                                                            Expanded(
+                                                              child: CustomButtons.icon(
+                                                                onPressed: () => controller.manageFilter(isMobile),
+                                                                child: const Icon(Icons.search, color: kBlackColor),
+                                                              ),
+                                                            ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                        },
+                                      ),
                                     ),
+                                  )
+                                : Row(
+                                    children: [
+                                      const Icon(Icons.search),
+                                      const SizedBox(width: 8.0),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text('Where to?', style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold)),
+                                          Text(
+                                            '${controller.filter?.location != null ? MainAppServie.find.getLocationNameById(controller.filter!.location!) : 'Anywhere'} • ${controller.filter?.getDuration ?? 'Any week'} • ${controller.filter?.guest.total}',
+                                            style: textTheme.bodyMedium,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
-                                )
-                              : Row(
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: Paddings.exceptional),
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(border: lightBorder, borderRadius: circularRadius, color: kNeutralColor100),
+                          child: CustomButtons.icon(
+                            padding: const EdgeInsets.all(Paddings.large),
+                            icon: const Icon(Icons.tune_outlined),
+                            onPressed: () => Get.bottomSheet(MoreFiltersPopup(maxWidth: constraints.maxWidth), isScrollControlled: true),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        Column(
+                          children: [
+                            const SizedBox(height: Paddings.large),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                padding: const EdgeInsets.only(right: Paddings.regular),
+                                controller: scrollController,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    const Icon(Icons.search),
-                                    const SizedBox(width: 8.0),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Where to?', style: textTheme.bodyMedium!.copyWith(fontWeight: FontWeight.bold)),
-                                        Text(
-                                          '${controller.filter?.location != null ? MainAppServie.find.getLocationNameById(controller.filter!.location!) : 'Anywhere'} • ${controller.filter?.getDuration ?? 'Any week'} • ${controller.filter?.guest.total}',
-                                          style: textTheme.bodyMedium,
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: Paddings.exceptional * 1.5, vertical: Paddings.regular),
+                                      child: FittedBox(
+                                        child: Text(
+                                          "Découvrez notre sélection pour vos vacances",
+                                          style: TextStyle(
+                                            fontSize: 26.0,
+                                            height: 1.5,
+                                            color: Color.fromRGBO(33, 45, 82, 1),
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
-                                      ],
+                                      ),
+                                    ),
+                                    propertiesList,
+                                    Obx(
+                                      () => Helper.isLoading.value
+                                          ? Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: Paddings.large, horizontal: Paddings.exceptional * 1.5),
+                                              child: Center(child: Lottie.asset(Assets.fetchingData, height: 100)),
+                                            )
+                                          : const SizedBox(),
                                     ),
                                   ],
                                 ),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: Paddings.exceptional),
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(border: lightBorder, borderRadius: circularRadius, color: kNeutralColor100),
-                        child: CustomButtons.icon(
-                          padding: const EdgeInsets.all(Paddings.large),
-                          icon: const Icon(Icons.tune_outlined),
-                          onPressed: () => Get.bottomSheet(MoreFiltersPopup(maxWidth: constraints.maxWidth), isScrollControlled: true),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-                Expanded(
-                  child: Stack(
-                    children: [
-                      Column(
-                        children: [
-                          const SizedBox(height: Paddings.large),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.only(right: Paddings.regular),
-                              controller: scrollController,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: Paddings.exceptional * 1.5, vertical: Paddings.regular),
-                                    child: Text(
-                                      "Découvrez notre sélection pour vos vacances",
-                                      style: TextStyle(
-                                        fontSize: 26.0,
-                                        height: 1.5,
-                                        color: Color.fromRGBO(33, 45, 82, 1),
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                  propertiesList,
-                                  Obx(
-                                    () => Helper.isLoading.value
-                                        ? Padding(
-                                            padding: const EdgeInsets.symmetric(vertical: Paddings.large, horizontal: Paddings.exceptional * 1.5),
-                                            child: Center(child: Lottie.asset(Assets.fetchingData, height: 100)),
-                                          )
-                                        : const SizedBox(),
-                                  ),
-                                ],
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      if (controller.isDropdownOpen) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile))),
-                    ],
+                          ],
+                        ),
+                        if (controller.isDropdownOpen) Positioned.fill(child: GestureDetector(onTap: () => controller.manageFilter(isMobile))),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            if (controller.isDropdownOpen) Positioned(child: controller.filterOverlayWidget(maxWidth: constraints.maxWidth)),
-          ],
-        ),
-      ),
+                ],
+              ),
+              if (controller.isDropdownOpen) Positioned(child: controller.filterOverlayWidget(maxWidth: constraints.maxWidth)),
+            ],
+          ),
+        );
+      },
     );
   }
 }

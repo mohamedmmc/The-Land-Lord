@@ -283,7 +283,6 @@ class PropertyFilterController extends GetxController {
             padding: const EdgeInsets.only(right: Paddings.regular),
             child: CustomButtons.icon(
               onPressed: () async {
-                print('checkin clear onPressed');
                 _filter?.checkin = null;
                 _filter?.checkout = null;
                 toggleOverlay();
@@ -302,14 +301,13 @@ class PropertyFilterController extends GetxController {
             padding: const EdgeInsets.only(right: Paddings.regular),
             child: CustomButtons.icon(
               onPressed: () async {
-                print('checkout clear onPressed');
                 _filter?.checkout = null;
                 toggleOverlay();
                 await Future.delayed(const Duration(milliseconds: 100));
                 setCurrentStep(PropertyFilterSteps.checkout);
                 update();
               },
-              icon: const Icon(Icons.clear, size: 14, color: Colors.red),
+              icon: const Icon(Icons.clear, size: 14),
             ),
           );
         }
