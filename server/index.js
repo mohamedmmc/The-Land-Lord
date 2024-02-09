@@ -12,7 +12,7 @@ require("./src/routes/database_route")(app);
 require("./src/routes/location_route")(app);
 require("./src/routes/property_route")(app);
 
-var host = process.env.HOST || "0.0.0.0";
+var host = "0.0.0.0";
 // Listen on a specific port via the PORT environment variable
 var port = process.env.PORT || 8080;
 
