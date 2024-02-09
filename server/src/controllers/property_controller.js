@@ -176,7 +176,7 @@ exports.getAvailable = async (req, res) => {
 
     return res.status(200).json({ formattedList });
   } catch (error) {
-    return res.status(500).json({ message: a });
+    return res.status(500).json({ message: error });
   }
 };
 
