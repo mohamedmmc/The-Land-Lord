@@ -149,22 +149,31 @@ exports.getAvailable = async (req, res) => {
 
     const formattedList = locationList
       .filter((row) => row.price != null)
-      .map((row) => ({
-        id: row.id,
-        name: row.name,
-        price: String(
-          // (parseInt(row.price) + parseInt(row.cleaning_price)) * devise
-          parseInt(row.price) * devise
-        ),
-        location: row.location,
-        coordinates: row.coordinates,
-        images: row.image_urls.split(","),
-        houseRules: row.house_rules,
-        description: row.text,
-        beds: row.can_sleep_max,
-        guests: row.standard_guests,
-        wcCount: row.wc_count,
-      }));
+      .map((row) => {
+        // Parse coordinates string to JSON
+        const coordinatesObj = JSON.parse(row.coordinates);
+        // Convert latitude and longitude values to numbers
+        const latitude = coordinatesObj.Latitude[0];
+        const longitude = coordinatesObj.Longitude[0];
+        // Assign the converted values back to the coordinates object
+        coordinatesObj.Latitude[0] = latitude;
+        coordinatesObj.Longitude[0] = longitude;
+
+        return {
+          id: row.id,
+          name: row.name,
+          price: String(parseInt(row.price) * devise),
+          location: row.location,
+          coordinates: coordinatesObj, // Assign back the modified coordinates object
+          images: row.image_urls.split(","),
+          houseRules: row.house_rules,
+          description: row.text,
+          beds: row.can_sleep_max,
+          guests: row.standard_guests,
+          wcCount: row.wc_count,
+        };
+      });
+
     return res.status(200).json({ formattedList });
   } catch (error) {
     return res.status(500).json({ message: a });
