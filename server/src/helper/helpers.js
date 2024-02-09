@@ -295,13 +295,9 @@ function resizeImageFromRentals(list, ID) {
   // Directly filter images within the map function for conciseness
   return list.map(async (image, index) => {
     const imageUrl = image["_"];
-
-    if (ID == 3347542) {
-      console.log("bouya");
-    }
-    // const adjustedName = adjustString(imageUrl);
+    var photoCloudinary = `${ID}_${index}.jpg`;
     // Only process images matching the specified URL pattern
-    const imageName = `${ID}_${index}.jpg`;
+    // const imageName = ;
     try {
       const founedProperty = await PropertyImage.findOne({
         where: {
@@ -309,8 +305,9 @@ function resizeImageFromRentals(list, ID) {
         },
       });
       if (!founedProperty) {
-        const imageBuffer = await downloadImage(imageUrl);
-        await saveImage(imageName, imageBuffer);
+        photoCloudinary = await cloudinary.uploader.upload(imageUrl);
+        // const imageBuffer = await downloadImage(imageUrl);
+        // await saveImage(imageName, imageBuffer);
       }
     } catch (error) {
       console.error("Error processing image:", error);
@@ -321,7 +318,7 @@ function resizeImageFromRentals(list, ID) {
     return {
       url: imageUrl,
       property_id: ID,
-      thumbnail: imageName,
+      thumbnail: photoCloudinary.url,
     };
   });
 }

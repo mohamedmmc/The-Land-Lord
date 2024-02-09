@@ -153,7 +153,8 @@ exports.getAvailable = async (req, res) => {
         id: row.id,
         name: row.name,
         price: String(
-          (parseInt(row.price) + parseInt(row.cleaning_price)) * devise
+          // (parseInt(row.price) + parseInt(row.cleaning_price)) * devise
+          parseInt(row.price) * devise
         ),
         location: row.location,
         coordinates: row.coordinates,
@@ -393,5 +394,30 @@ exports.getCalendarPropertyId = async (req, res) => {
     return res.status(200).json({ mappedCalendar });
   } catch (error) {
     return res.status(500).json({ message: error });
+  }
+};
+
+exports.getPriceProperty = async (req, res) => {
+  try {
+    const { id, dateFrom, dateTo } = req.body;
+    var body = {
+      Pull_GetPropertyAvbPrice_RQ: {
+        Authentication: {
+          UserName: process.env.RENTALS_UNITED_LOGIN,
+          Password: process.env.RENTALS_UNITED_PASS,
+        },
+        PropertyID: id,
+        DateFrom: dateFrom,
+        DateTo: dateTo,
+      },
+    };
+
+    const resultJson = await getRentalsResponse(
+      body,
+      "Pull_GetPropertyAvbPrice_RQ"
+    );
+    return res.status(200).json(resultJson);
+  } catch (error) {
+    return res.status(500).json(error);
   }
 };

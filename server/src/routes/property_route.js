@@ -7,5 +7,6 @@ module.exports = (app) => {
   router.get("/", propertyController.getAvailable);
   router.get("/:id", propertyController.getDetail);
   router.get("/:id/:location", propertyController.getCalendarPropertyId);
+  router.post("/get-price", propertyController.getPriceProperty);
   app.use("/api/property", router);
 };
