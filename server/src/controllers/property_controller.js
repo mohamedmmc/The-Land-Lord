@@ -151,7 +151,13 @@ exports.getAvailable = async (req, res) => {
       .filter((row) => row.price != null)
       .map((row) => {
         // Parse coordinates string to JSON
-        const coordinatesObj = JSON.parse(row.coordinates);
+        let coordinatesObj;
+        try {
+          coordinatesObj = JSON.parse(row.coordinates);
+        } catch (error) {
+          console.error("Error parsing coordinates JSON:", error);
+          // Handle the error, e.g., provide default coordinates or log the error
+        }
         // Convert latitude and longitude values to numbers
         const latitude = coordinatesObj.Latitude[0];
         const longitude = coordinatesObj.Longitude[0];
