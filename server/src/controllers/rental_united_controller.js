@@ -262,6 +262,9 @@ async function getAllReservation() {
       for (const propertyReservation of propertyListJson
         .Pull_ListPropertiesBlocks_RS.Properties?.[0]?.PropertyBlock) {
         for (const dates of propertyReservation.Block) {
+          if (propertyReservation["$"].PropertyID == 3754945) {
+            console.log("youpi");
+          }
           const reservation = {
             property_id: propertyReservation["$"].PropertyID,
             date_from: dates.DateFrom[0],

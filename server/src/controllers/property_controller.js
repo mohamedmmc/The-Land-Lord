@@ -24,7 +24,7 @@ exports.getAvailable = async (req, res) => {
   } = req.query;
   const language = languageQuery ? languageQuery : 1;
   const page = pageQuery ?? 1;
-  const listAmenities = amenities ? JSON.parse(amenities) : [];
+  const listAmenities = amenities ? JSON.parse(amenities) : null;
   const limit = limitQuery ? parseInt(limitQuery) : 9;
   const offset = (page - 1) * limit;
 
@@ -106,10 +106,20 @@ exports.getAvailable = async (req, res) => {
         ${!priceMin ? "" : "AND property_price.price * :devise >= :priceMin"}
         
         ${!typeProperty ? "" : "AND property.type_property_id = :typeProperty"}
+        ${
+          !listAmenities
+            ? ""
+            : `AND property.id IN (
+              SELECT property_id 
+              FROM property_amenity 
+              WHERE amenity_id IN (:listAmenities)
+              )`
+        }
       GROUP BY property.id, property.name, location.id
       ${!wcCount ? "" : "HAVING wc_count = :wcCount"}
-     LIMIT :limit OFFSET :offset
+      LIMIT :limit OFFSET :offset 
     `;
+
     const locationList = await sequelize.query(query, {
       type: sequelize.QueryTypes.SELECT,
       replacements: {
@@ -127,15 +137,12 @@ exports.getAvailable = async (req, res) => {
         smokeAllowed: `%Smoking - ${smokeAllowed}%`,
         devise: devise,
         wcCount: wcCount ? parseInt(wcCount) : null,
+        listAmenities: listAmenities,
       },
     });
 
     const formattedList = locationList
-      .filter(
-        (row) =>
-          row.price != null &&
-          hasDesiredAmenities(row.amenity_ids, listAmenities)
-      )
+      .filter((row) => row.price != null)
       .map((row) => ({
         id: row.id,
         name: row.name,
@@ -357,25 +364,28 @@ exports.getCalendarPropertyId = async (req, res) => {
       jsonResultPrice.Pull_ListPropertiesBlocks_RS.Properties[0].PropertyBlock.filter(
         (row) => Number(row["$"].PropertyID) === Number(ID)
       ).flatMap((property) =>
-        property.Block.map((block) => ({
-          block: {
-            date_from: block.DateFrom[0],
-            date_to: getDate(1, "days", "-", block.DateTo[0]),
-          },
-        }))
+        property.Block.map((block) => {
+          const dateFrom = block.DateFrom[0];
+          const dateTo = block.DateTo[0];
+          let adjustedDateTo;
+
+          if (dateFrom === dateTo) {
+            adjustedDateTo = dateTo;
+          } else {
+            adjustedDateTo = getDate(1, "days", "-", dateTo);
+          }
+
+          return {
+            block: {
+              date_from: dateFrom,
+              date_to: adjustedDateTo,
+            },
+          };
+        })
       );
+
     return res.status(200).json({ mappedCalendar });
   } catch (error) {
     return res.status(500).json({ message: error });
   }
 };
-// Function to check if the property has the desired amenities
-function hasDesiredAmenities(propertyAmenities, desiredAmenities) {
-  if (!propertyAmenities) {
-    return false;
-  }
-  const propertyAmenityIds = propertyAmenities.split(",").map(Number);
-  return desiredAmenities.every((amenityId) =>
-    propertyAmenityIds.includes(amenityId)
-  );
-}
