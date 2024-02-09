@@ -157,7 +157,7 @@ class MoreFiltersPopup extends StatelessWidget {
                               buildChips(
                                 isWrap: true,
                                 list: ['Any', ...MainAppServie.find.filterData?.propertyTypelist.map((e) => e.name).toList() ?? []],
-                                selected: controller.filter?.type != null ? MainAppServie.find.getTypeNameById(controller.filter!.type!) : 'Any',
+                                selected: controller.filter?.type != null ? MainAppServie.find.getTypeNameById(controller.filter!.type!) ?? 'Any' : 'Any',
                                 onSelect: (value) {
                                   if (value == 'Any') controller.filter?.type = null;
                                   controller.updateFilterModel(type: value == 'Any' ? null : MainAppServie.find.getTypeIdByName(value.toString()));

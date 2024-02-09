@@ -12,7 +12,7 @@ class MainAppServie extends GetxService {
   FilterData? filterData;
 
   // bool get isUserLoggedIn => SharedPreferencesService.find.get('jwt') != null;
-  String getTypeNameById(int id) => filterData!.propertyTypelist.singleWhere((element) => element.id == id).name;
+  String? getTypeNameById(int id) => filterData!.propertyTypelist.cast<DBObject?>().singleWhere((element) => element?.id == id, orElse: () => null)?.name;
 
   int getTypeIdByName(String name) => filterData!.propertyTypelist.singleWhere((element) => element.name == name).id;
 

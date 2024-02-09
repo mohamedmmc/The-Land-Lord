@@ -34,6 +34,9 @@ class PropertyDetailScreen extends StatelessWidget {
         // bottomNavigationBar: AppBottomNavigation(),
         body: GetBuilder<PropertyDetailController>(
           builder: (controller) {
+            final propertyTypeName = controller.propertyDetailsDTO?.mappedProperties != null
+                ? MainAppServie.find.getTypeNameById(int.parse(controller.propertyDetailsDTO!.mappedProperties!.typePropertyId))
+                : null;
             return DecoratedBox(
               decoration: BoxDecoration(border: Border(top: BorderSide(color: kNeutralLightColor, width: 0.5))),
               child: Helper.isLoading.value || !SharedPreferencesService.find.isReady || controller.propertyDetailsDTO == null
@@ -97,7 +100,7 @@ class PropertyDetailScreen extends StatelessWidget {
                                       ListTile(
                                         contentPadding: EdgeInsets.zero,
                                         title: Text(
-                                            '${MainAppServie.find.getTypeNameById(int.parse(controller.propertyDetailsDTO!.mappedProperties!.typePropertyId))} in ${controller.propertyDetailsDTO!.mappedProperties!.getFullAddress()}',
+                                            '${propertyTypeName != null ? '$propertyTypeName in' : ''} ${controller.propertyDetailsDTO!.mappedProperties!.getFullAddress()}',
                                             style: AppFonts.x18Bold),
                                         subtitle: Text(controller.propertyDetailsDTO!.mappedProperties!.getPropertySizeOverview(),
                                             style: AppFonts.x16Regular.copyWith(color: kNeutralColor)),
