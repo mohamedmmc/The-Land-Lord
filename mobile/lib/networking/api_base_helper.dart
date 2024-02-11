@@ -22,7 +22,7 @@ const String baseUrl = 'localhost';
 
 class ApiBaseHelper {
   final String _baseUrl = 'http://$baseUrl:3000';
-  // final String _baseUrl = 'https://api.youboost.tn';
+  //final String _baseUrl = 'https://the-landlord.onrender.com';
   String? getToken() => SharedPreferencesService().get('jwt');
 
   Future<dynamic> request(RequestType requestType, String url, {Map<String, String>? headers, dynamic body, File? file, bool sendToken = false}) async {
@@ -84,9 +84,11 @@ class ApiBaseHelper {
     return _returnResponse(response);
   }
 
-  String getImageProperty(String pictureName) => 'http://localhost:8080/$_baseUrl/public/properties/$pictureName';
+  //String getImageProperty(String pictureName) => 'http://localhost:8080/$_baseUrl/public/properties/$pictureName';
   
-  String getImageFromRentals(String pictureName) => 'http://localhost:8080/$pictureName';
+  //String getImageFromRentals(String pictureName) => 'http://localhost:8080/$pictureName';
+
+String getImage (String pictureName) => 'http://0.0.0.0:8080/$pictureName';
 }
 
 dynamic _returnResponse(http.Response response) {

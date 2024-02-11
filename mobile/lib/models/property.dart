@@ -50,7 +50,7 @@ class Property {
     guests = int.tryParse(json['guests']);
     beds = json['beds'] != null ? int.tryParse(json['beds']) : null;
     rooms = json['rooms'] != null ? int.tryParse(json['rooms']) : null;
-    imagePath = (json['images'] as List).map((e) => ApiBaseHelper().getImageProperty(e)).toList();
+    imagePath = (json['images'] as List).map((e) => ApiBaseHelper().getImage(e)).toList();
     bathrooms = json['bathrooms'];
     petsAllowed = json['petsAllowed'];
     amenities = json['amenities'];
@@ -61,7 +61,7 @@ class Property {
     reviews = json['reviews'];
     houseRules = json['rules'];
     coordinates =
-        json['coordinates'] == null ? null : LatLng(double.parse(jsonDecode(json['coordinates'])['Latitude'][0]), double.parse(jsonDecode(json['coordinates'])['Longitude'][0]));
+        json['coordinates'] == null ? null : LatLng(double.parse(json['coordinates']['latitude']), double.parse((json['coordinates'])['longitude']));
   }
 
   Map<String, dynamic> toJson() {

@@ -6,4 +6,35 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-module.exports = cloudinary;
+async function uploadImage(imagePath) {
+  try {
+    const result = await cloudinary.uploader.upload(imagePath);
+    return { id: result.public_id, url: result.url };
+  } catch (error) {
+    console.error("Error uploading image to Cloudinary:", error);
+    return null;
+  }
+}
+
+async function checkImageExists(publicId) {
+  try {
+    const result = await cloudinary.api.resource(publicId);
+    return result ? result : null;
+  } catch (error) {
+    console.error("Error checking image in Cloudinary:", error);
+    return null;
+  }
+}
+async function isLinkValid(url) {
+  try {
+    const response = await fetch(url, { method: "HEAD" });
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+}
+module.exports = {
+  uploadImage,
+  checkImageExists,
+  isLinkValid,
+};

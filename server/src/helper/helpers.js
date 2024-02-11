@@ -6,7 +6,11 @@ const path = require("path");
 const { log } = require("console");
 const { PropertyImage } = require("../models/property_image_model");
 const { Property } = require("../models/property_model");
-const cloudinary = require("../middlewares/cloudinary");
+const {
+  checkImageExists,
+  uploadImage,
+  isLinkValid,
+} = require("../middlewares/cloudinary");
 function addAuthentication(body, targetProperty) {
   const targetObject = body[targetProperty];
 
@@ -173,7 +177,7 @@ async function getDetailedProperties(propertyList) {
           );
 
         // data of table association image and property
-        const mappedImagePromises = await resizeImageFromRentals(
+        const mappedImagePromises = await resizeImageFromRentalsWithCloudinary(
           jsonResult.Pull_ListSpecProp_RS.Property[0].Images?.[0]?.Image,
           ID
         );
@@ -296,9 +300,8 @@ function resizeImageFromRentals(list, ID) {
   // Directly filter images within the map function for conciseness
   return list.map(async (image, index) => {
     const imageUrl = image["_"];
-    var photoCloudinary = `${ID}_${index}.jpg`;
     // Only process images matching the specified URL pattern
-    // const imageName = ;
+    const imageName = `${ID}_${index}.jpg`;
     try {
       const founedProperty = await PropertyImage.findOne({
         where: {
@@ -306,9 +309,8 @@ function resizeImageFromRentals(list, ID) {
         },
       });
       if (!founedProperty) {
-        photoCloudinary = await cloudinary.uploader.upload(imageUrl);
-        // const imageBuffer = await downloadImage(imageUrl);
-        // await saveImage(imageName, imageBuffer);
+        const imageBuffer = await downloadImage(imageUrl);
+        await saveImage(imageName, imageBuffer);
       }
     } catch (error) {
       console.error("Error processing image:", error);
@@ -323,21 +325,49 @@ function resizeImageFromRentals(list, ID) {
     };
   });
 }
-function adjustString(inputString) {
-  const jpgIndex = inputString.lastIndexOf(".jpg");
-  const jpegIndex = inputString.lastIndexOf(".jpeg");
-  const pngIndex = inputString.lastIndexOf(".png");
+async function resizeImageFromRentalsWithCloudinary(list, ID) {
+  // Directly filter images within the map function for conciseness
+  return Promise.all(
+    list.map(async (image, index) => {
+      const imageUrl = image["_"];
+      let thumbnail;
+      const imageName = `${ID}_${index}.jpg`;
+      try {
+        // Check if the image exists in the database
+        const foundImage = await PropertyImage.findOne({
+          where: {
+            url: imageUrl,
+          },
+        });
 
-  const index = Math.max(jpgIndex, jpegIndex, pngIndex);
+        const linkValid = foundImage
+          ? await isLinkValid(foundImage.thumbnail)
+          : null;
 
-  if (index !== -1) {
-    if (index === jpgIndex || index === pngIndex) {
-      return inputString.substring(0, index + 4);
-    } else if (index === jpegIndex) {
-      return inputString.substring(0, index + 5);
-    }
-  }
-  return inputString;
+        if (linkValid) {
+          thumbnail = foundImage.thumbnail;
+        } else {
+          const imageBuffer = await downloadImage(imageUrl);
+          const savedImage = await saveImage(imageName, imageBuffer);
+          const uploadResult = await uploadImage(savedImage);
+          if (!uploadResult) {
+            console.error("error uploading image:", error);
+            return {};
+          }
+          thumbnail = uploadResult.url;
+        }
+      } catch (error) {
+        console.error("Error processing image:", error);
+        return {};
+      }
+
+      return {
+        url: imageUrl,
+        property_id: ID,
+        thumbnail: thumbnail,
+      };
+    })
+  );
 }
 module.exports = {
   addAuthentication,
